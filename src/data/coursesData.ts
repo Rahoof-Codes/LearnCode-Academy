@@ -109,18 +109,21 @@ export const defaultCourses: Course[] = [
   {
     id: "html",
     title: "HTML5 Fundamentals",
-    description: "Learn the foundational markup language of the web. Structure layouts, tables, forms, and media elements.",
+    description: "Learn the foundational markup language of the web. Structure layouts, tables, forms, media, and modern HTML5 APIs.",
     trackId: "web-dev",
     difficulty: "Beginner",
-    duration: "4 hours",
+    duration: "8 hours",
     popularity: 95,
     newest: false,
     image: "/images/courses/html.jpg",
     objectives: [
-      "Understand standard HTML document structure",
+      "Understand standard HTML document structure and boilerplate",
       "Use semantic elements like <section>, <article>, and <aside>",
       "Create accessible links, images, list formats, and tables",
-      "Build forms with input validation for user inputs"
+      "Build forms with input validation for user inputs",
+      "Master HTML attributes, meta tags, and head elements",
+      "Embed external content with iframes and multimedia elements",
+      "Use HTML5 APIs like localStorage and Drag & Drop"
     ],
     modules: [
       {
@@ -154,13 +157,117 @@ export const defaultCourses: Course[] = [
               1,
               "<article> is designed for independent, self-contained contents that could be syndicated independently."
             )
+          },
+          {
+            id: "html-doc-structure",
+            title: "HTML Document Structure",
+            duration: "20 mins",
+            xp: 110,
+            contentFile: "html-doc-structure.md",
+            quiz: createQuickQuiz(
+              "Document Structure",
+              "What is the purpose of <!DOCTYPE html>?",
+              ["It creates the root element", "It tells the browser to use standards mode", "It links CSS", "It defines language"],
+              1,
+              "<!DOCTYPE html> instructs the browser to render the page using modern HTML5 standards mode."
+            )
+          },
+          {
+            id: "html-attributes",
+            title: "HTML Attributes & Global Attributes",
+            duration: "20 mins",
+            xp: 110,
+            contentFile: "html-attributes.md",
+            quiz: createQuickQuiz(
+              "HTML Attributes",
+              "Which attribute provides a unique identifier for an HTML element?",
+              ["class", "name", "id", "key"],
+              2,
+              "The id attribute gives an element a unique identifier that must not be repeated on the same page."
+            )
           }
         ]
       },
       {
-        id: "html-forms",
-        title: "Forms and Media Elements",
+        id: "html-media-lists",
+        title: "Links, Images and Lists",
         lessons: [
+          {
+            id: "html-links-images",
+            title: "Hyperlinks and Images",
+            duration: "20 mins",
+            xp: 110,
+            contentFile: "html-links-images.md",
+            quiz: createQuickQuiz(
+              "Links & Images",
+              "Which attribute specifies the destination URL of a hyperlink?",
+              ["src", "link", "href", "url"],
+              2,
+              "href (Hypertext Reference) specifies the link destination."
+            )
+          },
+          {
+            id: "html-lists",
+            title: "Lists (Ordered & Unordered)",
+            duration: "15 mins",
+            xp: 100,
+            contentFile: "html-lists.md",
+            quiz: createQuickQuiz(
+              "HTML Lists",
+              "Which tag creates a numbered (ordered) list?",
+              ["<ul>", "<ol>", "<li>", "<list>"],
+              1,
+              "<ol> creates an Ordered List with numbered items."
+            )
+          },
+          {
+            id: "html-block-inline",
+            title: "Block vs Inline Elements",
+            duration: "20 mins",
+            xp: 110,
+            contentFile: "html-block-inline.md",
+            quiz: createQuickQuiz(
+              "Block vs Inline",
+              "Which of the following is a block-level element?",
+              ["<span>", "<a>", "<div>", "<strong>"],
+              2,
+              "<div> is a block-level element that starts on a new line and takes full width."
+            )
+          },
+          {
+            id: "html-meta-head",
+            title: "Meta Tags & Head Elements",
+            duration: "25 mins",
+            xp: 120,
+            contentFile: "html-meta-head.md",
+            quiz: createQuickQuiz(
+              "Meta Tags",
+              "Which meta tag is essential for responsive mobile design?",
+              ["<meta name=\"description\">", "<meta name=\"viewport\">", "<meta charset=\"UTF-8\">", "<meta name=\"keywords\">"],
+              1,
+              "The viewport meta tag controls how the page scales and fits on mobile screens."
+            )
+          }
+        ]
+      },
+      {
+        id: "html-advanced-elements",
+        title: "Tables and Forms",
+        lessons: [
+          {
+            id: "html-tables",
+            title: "HTML Tabular Data",
+            duration: "25 mins",
+            xp: 120,
+            contentFile: "html-tables.md",
+            quiz: createQuickQuiz(
+              "HTML Tables",
+              "Which tag defines a new row in an HTML table?",
+              ["<td>", "<tr>", "<th>", "<table>"],
+              1,
+              "<tr> stands for Table Row and creates a new row in the table."
+            )
+          },
           {
             id: "html-form-elements",
             title: "Building Forms and Input Types",
@@ -173,6 +280,68 @@ export const defaultCourses: Course[] = [
               ["required", "needed", "validate", "must-fill"],
               0,
               "The 'required' attribute specifies that an input field must be filled out before submitting the form."
+            )
+          },
+          {
+            id: "html-entities",
+            title: "HTML Entities & Special Characters",
+            duration: "15 mins",
+            xp: 100,
+            contentFile: "html-entities.md",
+            quiz: createQuickQuiz(
+              "HTML Entities",
+              "Which HTML entity displays the less-than symbol (<)?",
+              ["&less;", "&lt;", "&lte;", "&<;"],
+              1,
+              "&lt; (less than) is the named entity for the < character."
+            )
+          }
+        ]
+      },
+      {
+        id: "html-embedding-apis",
+        title: "Multimedia & Embedding",
+        lessons: [
+          {
+            id: "html-multimedia",
+            title: "Multimedia Audio and Video",
+            duration: "20 mins",
+            xp: 110,
+            contentFile: "html-multimedia.md",
+            quiz: createQuickQuiz(
+              "Multimedia",
+              "Which attribute must be added to <video> to display play/pause buttons?",
+              ["buttons", "controls", "play", "media"],
+              1,
+              "The controls attribute is required to show standard browser playback controls."
+            )
+          },
+          {
+            id: "html-iframes",
+            title: "Iframes & Embedding Content",
+            duration: "20 mins",
+            xp: 120,
+            contentFile: "html-iframes.md",
+            quiz: createQuickQuiz(
+              "Iframes",
+              "Which attribute specifies the URL of content to embed in an iframe?",
+              ["href", "link", "src", "url"],
+              2,
+              "The src attribute specifies the URL of the document to display inside the iframe."
+            )
+          },
+          {
+            id: "html5-apis",
+            title: "HTML5 APIs (Storage & Drag/Drop)",
+            duration: "25 mins",
+            xp: 130,
+            contentFile: "html5-apis.md",
+            quiz: createQuickQuiz(
+              "HTML5 APIs",
+              "What is the difference between localStorage and sessionStorage?",
+              ["localStorage is faster", "sessionStorage persists after close", "localStorage persists after close, sessionStorage does not", "They are identical"],
+              2,
+              "localStorage data persists indefinitely until cleared, while sessionStorage is cleared when the tab is closed."
             )
           }
         ]

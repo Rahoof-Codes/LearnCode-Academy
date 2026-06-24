@@ -61,6 +61,7 @@ export interface UserProfile {
   completedQuizzes: Record<string, { score: number; passed: boolean }>;
   achievements: string[];
   certificates: Certificate[];
+  photoURL?: string;
 }
 
 interface AppContextType {
@@ -78,6 +79,12 @@ interface AppContextType {
   addCustomCourse: (course: Course) => Promise<void>;
   deleteCourse: (courseId: string) => Promise<void>;
   updateProfileName: (newName: string) => Promise<void>;
+  updateProfilePhoto: (photoURL: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string, name: string) => Promise<void>;
+  logout: () => Promise<void>;
+  saveProfile: (updatedProfile: UserProfile) => Promise<void>;
 }
 
 export const AppContext = createContext<AppContextType | null>(null);
@@ -156,6 +163,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 completedQuizzes: {},
                 achievements: [],
                 certificates: [],
+                photoURL: fbUser.photoURL || undefined,
               };
               await setDoc(userDocRef, newProfile);
               setUser(newProfile);
@@ -206,9 +214,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setUser(parsed);
       setRoleState(parsed.role || "student");
     } else {
-      const defaultUser = DEFAULT_PROFILE();
-      localStorage.setItem("learncode_profile", JSON.stringify(defaultUser));
-      setUser(defaultUser);
+      setUser(null);
     }
 
     if (savedCourses) {
@@ -494,6 +500,124 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await saveProfile(updatedProfile);
   };
 
+  const updateProfilePhoto = async (photoURL: string) => {
+    if (!user) return;
+    const updatedProfile = {
+      ...user,
+      photoURL
+    };
+    await saveProfile(updatedProfile);
+  };
+
+  const signInWithGoogle = async () => {
+    if (isFirebaseConfigured && auth) {
+      const { GoogleAuthProvider, signInWithPopup } = await import("firebase/auth");
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+    } else {
+      const defaultUser = DEFAULT_PROFILE("demo-student@learncode.academy");
+      localStorage.setItem("learncode_profile", JSON.stringify(defaultUser));
+      setUser(defaultUser);
+      setRoleState("student");
+    }
+  };
+  
+  const signInWithEmail = async (email: string, password: string) => {
+    if (isFirebaseConfigured && auth) {
+      await signInWithEmailAndPassword(auth, email, password);
+    } else {
+      const simulatedUsersStr = localStorage.getItem("learncode_simulated_users");
+      const simulatedUsers = simulatedUsersStr ? JSON.parse(simulatedUsersStr) : {};
+      const emailLower = email.toLowerCase();
+      if (simulatedUsers[emailLower]) {
+        if (simulatedUsers[emailLower].password === password) {
+          const profile = simulatedUsers[emailLower].profile;
+          localStorage.setItem("learncode_profile", JSON.stringify(profile));
+          setUser(profile);
+          setRoleState(profile.role || "student");
+        } else {
+          throw new Error("Invalid password.");
+        }
+      } else {
+        throw new Error("Account not found. Please register in the 'Create Account' tab.");
+      }
+    }
+  };
+
+  const signUpWithEmail = async (email: string, password: string, name: string) => {
+    if (isFirebaseConfigured && auth && db) {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const fbUser = userCredential.user;
+      
+      // Update display name
+      await fbUpdateProfile(fbUser, { displayName: name });
+      
+      // Write profile to Firestore immediately
+      const newProfile: UserProfile = {
+        uid: fbUser.uid,
+        name: name,
+        email: fbUser.email || email,
+        role: "student",
+        xp: 0,
+        level: 1,
+        streak: 1,
+        lastActiveDate: new Date().toISOString().split("T")[0],
+        enrolledCourses: [],
+        completedLessons: [],
+        completedQuizzes: {},
+        achievements: [],
+        certificates: [],
+      };
+      await setDoc(doc(db, "users", fbUser.uid), newProfile);
+      
+      setUser(newProfile);
+      setRoleState("student");
+    } else {
+      const simulatedUsersStr = localStorage.getItem("learncode_simulated_users");
+      const simulatedUsers = simulatedUsersStr ? JSON.parse(simulatedUsersStr) : {};
+      const emailLower = email.toLowerCase();
+      if (simulatedUsers[emailLower]) {
+        throw new Error("Account already exists with this email.");
+      }
+      
+      const mockUid = `mock-user-${Math.random().toString(36).substring(2, 10)}`;
+      const newProfile: UserProfile = {
+        uid: mockUid,
+        name: name,
+        email: email,
+        role: "student",
+        xp: 0,
+        level: 1,
+        streak: 1,
+        lastActiveDate: new Date().toISOString().split("T")[0],
+        enrolledCourses: [],
+        completedLessons: [],
+        completedQuizzes: {},
+        achievements: [],
+        certificates: [],
+      };
+      
+      simulatedUsers[emailLower] = {
+        password: password,
+        profile: newProfile
+      };
+      
+      localStorage.setItem("learncode_simulated_users", JSON.stringify(simulatedUsers));
+      localStorage.setItem("learncode_profile", JSON.stringify(newProfile));
+      setUser(newProfile);
+      setRoleState("student");
+    }
+  };
+
+  const logout = async () => {
+    if (isFirebaseConfigured && auth) {
+      await signOut(auth);
+    } else {
+      localStorage.removeItem("learncode_profile");
+      setUser(null);
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -511,6 +635,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         addCustomCourse,
         deleteCourse,
         updateProfileName,
+        updateProfilePhoto,
+        signInWithGoogle,
+        signInWithEmail,
+        signUpWithEmail,
+        logout,
+        saveProfile,
       }}
     >
       {children}

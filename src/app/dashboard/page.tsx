@@ -13,16 +13,16 @@ export default function Dashboard() {
 
   if (!user) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center p-8 bg-background">
-        <div className="glass-panel p-8 text-center rounded-xl max-w-md w-full border border-zinc-800 shadow-xl">
-          <BookOpen className="h-12 w-12 text-zinc-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">No Active Session</h2>
-          <p className="text-zinc-400 text-sm mb-6">
+      <div className="flex flex-1 flex-col items-center justify-center p-8">
+        <div className="glass-panel-heavy p-8 text-center rounded-2xl max-w-md w-full shadow-xl">
+          <BookOpen className="h-12 w-12 text-indigo-300 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-slate-800 mb-2">No Active Session</h2>
+          <p className="text-slate-400 text-sm mb-6">
             Please make sure you are running in Demo Mode or authenticated.
           </p>
           <Link
             href="/"
-            className="inline-flex w-full justify-center rounded-lg bg-cyan-500 px-4 py-2.5 font-semibold text-zinc-950 hover:bg-cyan-400 transition-all"
+            className="inline-flex w-full justify-center rounded-xl btn-gradient px-4 py-3 font-semibold text-sm shadow-lg shadow-indigo-500/15"
           >
             Go Home
           </Link>
@@ -62,10 +62,10 @@ export default function Dashboard() {
           {/* Header Greeting */}
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-3xl font-extrabold tracking-tight text-white">
+              <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
                 Welcome back, <span className="text-gradient-primary">{user.name}</span>
               </h1>
-              <p className="text-zinc-400 text-sm">
+              <p className="text-slate-400 text-sm">
                 Track your active courses, complete exercises, and earn tech credentials.
               </p>
             </div>
@@ -75,7 +75,7 @@ export default function Dashboard() {
                   resetProgress();
                 }
               }}
-              className="mt-4 md:mt-0 self-start text-xs font-semibold text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-md px-3 py-1.5 transition-all"
+              className="mt-4 md:mt-0 self-start text-xs font-semibold text-rose-500 bg-rose-50 hover:bg-rose-100 border border-rose-200/60 rounded-lg px-3 py-1.5 transition-all"
             >
               Reset Progress
             </button>
@@ -83,22 +83,22 @@ export default function Dashboard() {
 
           {/* Active Courses grid */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Bookmark className="h-5 w-5 text-cyan-400" />
+            <div className="flex items-center justify-between border-b border-indigo-100/60 pb-2">
+              <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Bookmark className="h-5 w-5 text-indigo-500" />
                 Active Enrollments ({enrolledCourses.length})
               </h2>
-              <Link href="/catalog" className="text-xs font-semibold text-cyan-400 hover:underline flex items-center">
+              <Link href="/catalog" className="text-xs font-semibold text-indigo-500 hover:underline flex items-center">
                 Explore Catalog <ChevronRight className="h-3 w-3" />
               </Link>
             </div>
 
             {enrolledCourses.length === 0 ? (
-              <div className="glass-panel p-8 rounded-xl text-center">
-                <p className="text-zinc-400 text-sm mb-4">You are not enrolled in any courses yet.</p>
+              <div className="glass-panel p-8 rounded-2xl text-center">
+                <p className="text-slate-400 text-sm mb-4">You are not enrolled in any courses yet.</p>
                 <Link
                   href="/catalog"
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-zinc-950 hover:bg-cyan-400 transition-all text-xs"
+                  className="inline-flex items-center gap-1.5 rounded-xl btn-gradient px-5 py-2.5 text-xs shadow-md shadow-indigo-500/15"
                 >
                   Browse Course Catalog
                   <ChevronRight className="h-4.5 w-4.5" />
@@ -112,16 +112,16 @@ export default function Dashboard() {
                   return (
                     <div 
                       key={course.id}
-                      className="glass-panel p-5 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4"
+                      className="glass-panel p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-lg hover:shadow-indigo-500/5 transition-all"
                     >
                       <div className="space-y-1.5 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className={`rounded-full px-2 py-0.5 text-xs font-semibold border ${
+                          <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold border ${
                             course.difficulty === "Beginner" 
-                              ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" 
+                              ? "bg-indigo-50 text-indigo-600 border-indigo-200/50" 
                               : course.difficulty === "Intermediate" 
-                              ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                              : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                              ? "bg-amber-50 text-amber-600 border-amber-200/50"
+                              : "bg-rose-50 text-rose-600 border-rose-200/50"
                           }`}>
                             {course.difficulty}
                           </span>
@@ -129,17 +129,17 @@ export default function Dashboard() {
                             <Clock className="h-3 w-3" /> {course.duration}
                           </span>
                         </div>
-                        <h3 className="text-lg font-bold text-white">{course.title}</h3>
+                        <h3 className="text-lg font-bold text-slate-800">{course.title}</h3>
                         
                         {/* Progress bar */}
                         <div className="space-y-1">
                           <div className="flex justify-between text-xs font-medium">
-                            <span className="text-zinc-400">Course Progress</span>
-                            <span className="text-cyan-400">{progress}%</span>
+                            <span className="text-slate-400">Course Progress</span>
+                            <span className="text-indigo-600 font-bold">{progress}%</span>
                           </div>
-                          <div className="h-1.5 w-full rounded-full bg-zinc-800 overflow-hidden border border-zinc-700/50">
+                          <div className="h-2 w-full rounded-full bg-indigo-100 overflow-hidden">
                             <div 
-                              className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 transition-all duration-300"
+                              className="h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 transition-all duration-500"
                               style={{ width: `${progress}%` }}
                             />
                           </div>
@@ -149,20 +149,20 @@ export default function Dashboard() {
                       <div className="flex items-center gap-3">
                         <Link
                           href={`/courses/${course.id}`}
-                          className="rounded-lg bg-zinc-800 hover:bg-zinc-700 px-4 py-2 text-xs font-semibold text-white border border-zinc-700/50 transition-all text-center"
+                          className="rounded-xl bg-white hover:bg-slate-50 px-4 py-2.5 text-xs font-semibold text-slate-600 border border-slate-200/80 transition-all text-center shadow-sm"
                         >
                           Course Syllabus
                         </Link>
                         
                         {progress === 100 ? (
-                          <div className="flex items-center gap-1.5 text-emerald-400 font-semibold text-xs rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-2">
-                            <CheckCircle className="h-4 w-4 fill-emerald-500/10" />
+                          <div className="flex items-center gap-1.5 text-emerald-600 font-semibold text-xs rounded-xl bg-emerald-50 border border-emerald-200/50 px-4 py-2.5">
+                            <CheckCircle className="h-4 w-4" />
                             Completed
                           </div>
                         ) : (
                           <Link
                             href={resumeLink}
-                            className="flex items-center justify-center gap-1 rounded-lg bg-cyan-500 hover:bg-cyan-400 px-4.5 py-2 text-xs font-bold text-zinc-950 transition-all shadow-md shadow-cyan-500/15"
+                            className="flex items-center justify-center gap-1 rounded-xl btn-gradient px-5 py-2.5 text-xs shadow-md shadow-indigo-500/15"
                           >
                             <Play className="h-3.5 w-3.5 fill-white" />
                             {progress > 0 ? "Resume" : "Start"}
@@ -178,63 +178,65 @@ export default function Dashboard() {
 
           {/* Quick Stats Grid */}
           <div className="grid gap-4 grid-cols-3">
-            <div className="glass-panel p-4 rounded-xl text-center">
-              <span className="text-xs font-semibold text-zinc-400 block mb-1">Enrolled</span>
-              <span className="text-2xl font-extrabold text-white">{user.enrolledCourses.length}</span>
+            <div className="glass-panel p-5 rounded-2xl text-center hover:shadow-lg hover:shadow-indigo-500/5 transition-all">
+              <span className="text-xs font-semibold text-slate-400 block mb-1">Enrolled</span>
+              <span className="text-2xl font-extrabold text-slate-800">{user.enrolledCourses.length}</span>
             </div>
-            <div className="glass-panel p-4 rounded-xl text-center">
-              <span className="text-xs font-semibold text-zinc-400 block mb-1">XP Earned</span>
-              <span className="text-2xl font-extrabold text-cyan-400">{user.xp}</span>
+            <div className="glass-panel p-5 rounded-2xl text-center hover:shadow-lg hover:shadow-violet-500/5 transition-all">
+              <span className="text-xs font-semibold text-slate-400 block mb-1">XP Earned</span>
+              <span className="text-2xl font-extrabold text-gradient-primary">{user.xp}</span>
             </div>
-            <div className="glass-panel p-4 rounded-xl text-center">
-              <span className="text-xs font-semibold text-zinc-400 block mb-1">Certificates</span>
-              <span className="text-2xl font-extrabold text-emerald-400">{user.certificates.length}</span>
+            <div className="glass-panel p-5 rounded-2xl text-center hover:shadow-lg hover:shadow-emerald-500/5 transition-all">
+              <span className="text-xs font-semibold text-slate-400 block mb-1">Certificates</span>
+              <span className="text-2xl font-extrabold text-emerald-500">{user.certificates.length}</span>
             </div>
           </div>
         </div>
 
-        {/* ================= RIGHT 1 COLUMN: GAMIFICATION (LEVEL, STREAK, ACHIEVEMENTS, CERTIFICATES) ================= */}
+        {/* ================= RIGHT 1 COLUMN: GAMIFICATION ================= */}
         <div className="space-y-8">
           
           {/* Level Tracker Card */}
-          <div className="glass-panel p-6 rounded-xl space-y-4">
-            <h3 className="text-md font-bold text-white flex items-center gap-1.5">
-              <Award className="h-5 w-5 text-cyan-400" />
+          <div className="glass-panel p-6 rounded-2xl space-y-4">
+            <h3 className="text-md font-bold text-slate-800 flex items-center gap-1.5">
+              <Award className="h-5 w-5 text-indigo-500" />
               Level Progression
             </h3>
             
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-cyan-400 font-extrabold text-xl text-zinc-950 shadow-lg border border-white/10">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 font-extrabold text-xl text-white shadow-xl shadow-indigo-500/20 border-3 border-white relative">
                 {levelInfo.level}
+                {/* Pulse ring */}
+                <div className="absolute inset-0 rounded-full border-2 border-indigo-400 animate-pulse-ring" />
               </div>
               <div className="flex-1 space-y-1">
                 <div className="flex justify-between text-xs">
-                  <span className="font-semibold text-cyan-300">Level {levelInfo.level}</span>
-                  <span className="font-semibold text-zinc-400">{levelInfo.xpInCurrentLevel} / {levelInfo.xpNeededForNextLevel} XP</span>
+                  <span className="font-bold text-indigo-600">Level {levelInfo.level}</span>
+                  <span className="font-semibold text-slate-400">{levelInfo.xpInCurrentLevel} / {levelInfo.xpNeededForNextLevel} XP</span>
                 </div>
-                <div className="h-2 w-full rounded-full bg-zinc-800 overflow-hidden border border-zinc-700/50">
+                <div className="h-2.5 w-full rounded-full bg-indigo-100 overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400"
+                    className="h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 transition-all duration-500"
                     style={{ width: `${levelInfo.progressPercentage}%` }}
                   />
                 </div>
-                <span className="text-2xs text-zinc-500 block">
+                <span className="text-2xs text-slate-400 block">
                   {levelInfo.xpNeededForNextLevel - levelInfo.xpInCurrentLevel} XP required to level up.
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center justify-between bg-zinc-900/60 p-3 rounded-lg border border-zinc-800/80 text-sm">
-              <span className="text-zinc-400 flex items-center gap-1.5">
-                <Flame className="h-4.5 w-4.5 text-orange-500" /> Current Streak:
+            <div className="flex items-center justify-between bg-amber-50 p-3.5 rounded-xl border border-amber-200/50 text-sm">
+              <span className="text-slate-500 flex items-center gap-1.5">
+                <Flame className="h-4.5 w-4.5 text-orange-500 fill-orange-500" /> Current Streak:
               </span>
-              <span className="font-extrabold text-orange-500">{user.streak} Days</span>
+              <span className="font-extrabold text-orange-500">{user.streak} Days 🔥</span>
             </div>
           </div>
 
           {/* Recent Achievements */}
-          <div className="glass-panel p-6 rounded-xl space-y-4">
-            <h3 className="text-md font-bold text-white flex items-center gap-1.5">
+          <div className="glass-panel p-6 rounded-2xl space-y-4">
+            <h3 className="text-md font-bold text-slate-800 flex items-center gap-1.5">
               <Award className="h-5 w-5 text-amber-500" />
               Earned Achievements ({user.achievements.length})
             </h3>
@@ -246,10 +248,10 @@ export default function Dashboard() {
                   <div 
                     key={ach.id} 
                     title={`${ach.title}: ${ach.description} (${ach.xpReward} XP)`}
-                    className={`flex flex-col items-center justify-center p-2.5 rounded-lg border transition-all ${
+                    className={`flex flex-col items-center justify-center p-2.5 rounded-xl border transition-all ${
                       isUnlocked 
-                        ? "bg-amber-500/10 border-amber-500/25 text-amber-400" 
-                        : "bg-slate-900/30 border-white/5 text-slate-600 opacity-60"
+                        ? "bg-amber-50 border-amber-200/50 text-amber-500 shadow-sm" 
+                        : "bg-slate-50/50 border-slate-200/30 text-slate-300 opacity-50"
                     }`}
                   >
                     <Award className="h-6 w-6" />
@@ -261,21 +263,21 @@ export default function Dashboard() {
               })}
             </div>
             <div className="text-center pt-2">
-              <Link href="/profile" className="text-xs font-semibold text-cyan-400 hover:underline">
+              <Link href="/profile" className="text-xs font-semibold text-indigo-500 hover:underline">
                 View All Achievements
               </Link>
             </div>
           </div>
 
           {/* Certificates Hub Summary */}
-          <div className="glass-panel p-6 rounded-xl space-y-4">
-            <h3 className="text-md font-bold text-white flex items-center gap-1.5">
-              <FileText className="h-5 w-5 text-emerald-400" />
+          <div className="glass-panel p-6 rounded-2xl space-y-4">
+            <h3 className="text-md font-bold text-slate-800 flex items-center gap-1.5">
+              <FileText className="h-5 w-5 text-emerald-500" />
               Certificates Portal ({user.certificates.length})
             </h3>
 
             {user.certificates.length === 0 ? (
-              <p className="text-xs text-zinc-500 leading-relaxed">
+              <p className="text-xs text-slate-400 leading-relaxed">
                 Graduate from any course by completing all lessons and scoring 100% on the quizzes to issue a digital certificate.
               </p>
             ) : (
@@ -284,13 +286,13 @@ export default function Dashboard() {
                   <Link 
                     key={cert.id}
                     href="/profile"
-                    className="flex items-center justify-between p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all"
+                    className="flex items-center justify-between p-3 rounded-xl bg-emerald-50 border border-emerald-200/50 hover:bg-emerald-100/80 transition-all"
                   >
                     <div className="flex flex-col">
-                      <span className="text-xs font-bold text-white line-clamp-1">{cert.courseName}</span>
-                      <span className="text-3xs text-zinc-400">ID: {cert.id}</span>
+                      <span className="text-xs font-bold text-slate-800 line-clamp-1">{cert.courseName}</span>
+                      <span className="text-3xs text-slate-400">ID: {cert.id}</span>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-emerald-400" />
+                    <ChevronRight className="h-4 w-4 text-emerald-500" />
                   </Link>
                 ))}
               </div>
