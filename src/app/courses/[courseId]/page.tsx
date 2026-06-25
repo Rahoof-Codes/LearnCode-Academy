@@ -14,7 +14,7 @@ export default function CourseDetail() {
   const params = useParams();
   const courseId = params.courseId as string;
 
-  const { courses, user, enrollInCourse } = useApp();
+  const { courses, user, enrollInCourse, loading } = useApp();
   const course = courses.find((c) => c.id === courseId);
 
   // Accordion state (open all modules by default)
@@ -37,31 +37,35 @@ export default function CourseDetail() {
   if (!course) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center p-8 bg-background text-center">
-        <h2 className="text-2xl font-bold text-white mb-2">Course Not Found</h2>
-        <p className="text-slate-400 mb-6">The course you are looking for does not exist or has been removed.</p>
-        <Link href="/catalog" className="rounded-lg bg-blue-600 px-5 py-2.5 font-semibold text-white">
+        <h2 className="text-2xl font-bold text-slate-800 mb-2">Course Not Found</h2>
+        <p className="text-slate-500 mb-6">The course you are looking for does not exist or has been removed.</p>
+        <Link href="/catalog" className="rounded-lg bg-indigo-600 hover:bg-indigo-500 px-5 py-2.5 font-semibold text-white transition-all shadow-md shadow-indigo-500/15">
           Back to Catalog
         </Link>
       </div>
     );
   }
 
-  const enrolled = user?.enrolledCourses.includes(course.id) || false;
+  const enrolled = user?.enrolledCourses?.includes(course.id) || false;
 
   // Calculate stats
   const totalLessons = course.modules.flatMap(m => m.lessons);
   const totalLessonsCount = totalLessons.length;
-  const completedLessons = totalLessons.filter(l => user?.completedLessons.includes(l.id)).length;
+  const completedLessons = totalLessons.filter(l => user?.completedLessons?.includes(l.id) || false).length;
   const progressPercent = totalLessonsCount > 0 ? Math.round((completedLessons / totalLessonsCount) * 100) : 0;
 
   // Find first incomplete lesson to start/resume
   const getNextLessonLink = () => {
-    const nextLesson = totalLessons.find(l => !user?.completedLessons.includes(l.id));
+    const nextLesson = totalLessons.find(l => !user?.completedLessons?.includes(l.id));
     const targetId = nextLesson ? nextLesson.id : totalLessons[0]?.id;
     return `/courses/${course.id}/lessons/${targetId}`;
   };
 
   const handleEnroll = async () => {
+    if (!user) {
+      router.push("/signin");
+      return;
+    }
     await enrollInCourse(course.id);
     // Push directly into the first lesson
     const targetLink = getNextLessonLink();
@@ -72,7 +76,7 @@ export default function CourseDetail() {
     <div className="mx-auto max-w-5xl px-4 py-8 md:px-8 w-full space-y-8">
       
       {/* Back to catalog */}
-      <Link href="/catalog" className="text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1">
+      <Link href="/catalog" className="text-xs font-semibold text-slate-500 hover:text-indigo-600 flex items-center gap-1 transition-colors">
         &larr; Back to Catalog
       </Link>
 
@@ -91,41 +95,43 @@ export default function CourseDetail() {
             }`}>
               {course.difficulty}
             </span>
-            <span className="text-xs font-semibold text-slate-400 flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5" />
+            <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5 text-indigo-500" />
               {course.duration}
             </span>
-            <span className="text-xs font-semibold text-slate-400 flex items-center gap-1">
-              <BookOpen className="h-3.5 w-3.5" />
+            <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+              <BookOpen className="h-3.5 w-3.5 text-indigo-500" />
               {totalLessonsCount} lessons
             </span>
           </div>
 
-          <h1 className="text-3xl font-extrabold text-white">{course.title}</h1>
-          <p className="text-slate-300 text-sm md:text-base max-w-2xl leading-relaxed">
+          <h1 className="text-3xl font-extrabold text-slate-800">{course.title}</h1>
+          <p className="text-slate-600 text-sm md:text-base max-w-2xl leading-relaxed">
             {course.description}
           </p>
         </div>
 
         {/* Action Button */}
         <div className="w-full md:w-auto flex flex-col items-center gap-3">
-          {enrolled ? (
+          {loading ? (
+            <div className="h-12 w-36 bg-indigo-50/50 border border-indigo-100/30 animate-pulse rounded-lg" />
+          ) : enrolled ? (
             <div className="w-full space-y-3">
               <div className="space-y-1">
                 <div className="flex justify-between text-xs font-bold">
-                  <span className="text-slate-400">Course Progress</span>
-                  <span className="text-indigo-400">{progressPercent}%</span>
+                  <span className="text-slate-500">Course Progress</span>
+                  <span className="text-indigo-600">{progressPercent}%</span>
                 </div>
-                <div className="h-2 w-full md:w-48 rounded-full bg-slate-800 overflow-hidden border border-slate-700/50">
+                <div className="h-2 w-full md:w-48 rounded-full bg-slate-100 overflow-hidden border border-indigo-100/50">
                   <div 
-                    className="h-full bg-gradient-to-r from-blue-500 to-indigo-500"
+                    className="h-full bg-gradient-to-r from-indigo-500 to-violet-500"
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>
               </div>
               <Link
                 href={getNextLessonLink()}
-                className="flex items-center justify-center gap-1.5 w-full rounded-lg bg-blue-600 hover:bg-blue-500 px-6 py-3 font-bold text-white transition-all text-sm"
+                className="flex items-center justify-center gap-1.5 w-full rounded-lg bg-indigo-600 hover:bg-indigo-500 px-6 py-3 font-bold text-white transition-all text-sm shadow-md shadow-indigo-500/10 hover:scale-[1.02]"
               >
                 <Play className="h-4 w-4 fill-white" />
                 Resume Learning
@@ -134,7 +140,7 @@ export default function CourseDetail() {
           ) : (
             <button
               onClick={handleEnroll}
-              className="flex items-center justify-center w-full md:w-auto rounded-lg bg-blue-600 hover:bg-blue-500 px-8 py-3.5 font-bold text-white transition-all hover:scale-103 shadow-lg shadow-blue-500/20 text-sm cursor-pointer"
+              className="flex items-center justify-center w-full md:w-auto rounded-lg bg-indigo-600 hover:bg-indigo-500 px-8 py-3.5 font-bold text-white transition-all hover:scale-[1.03] shadow-lg shadow-indigo-500/20 text-sm cursor-pointer"
             >
               Enroll in Course
             </button>
@@ -147,8 +153,8 @@ export default function CourseDetail() {
         
         {/* Left 2 Cols: Curriculum / Syllabus */}
         <div className="md:col-span-2 space-y-4">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2 border-b border-white/5 pb-2">
-            <List className="h-5.5 w-5.5 text-blue-400" />
+          <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2 border-b border-indigo-100/60 pb-2">
+            <List className="h-5.5 w-5.5 text-indigo-500" />
             Course Curriculum
           </h2>
 
@@ -160,17 +166,17 @@ export default function CourseDetail() {
                   {/* Module header */}
                   <button
                     onClick={() => toggleModule(module.id)}
-                    className="w-full flex items-center justify-between p-4 bg-slate-900/40 border-b border-white/5 text-left font-bold text-sm text-white"
+                    className="w-full flex items-center justify-between p-4 bg-indigo-50/50 border-b border-indigo-100/50 text-left font-bold text-sm text-slate-800 transition-colors hover:bg-indigo-100/20"
                   >
                     <span>{module.title}</span>
-                    {isOpen ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
+                    {isOpen ? <ChevronUp className="h-4 w-4 text-slate-500" /> : <ChevronDown className="h-4 w-4 text-slate-500" />}
                   </button>
 
                   {/* Module Lessons list */}
                   {isOpen && (
-                    <div className="divide-y divide-white/5">
+                    <div className="divide-y divide-indigo-100/50">
                       {module.lessons.map((lesson) => {
-                        const isDone = user?.completedLessons.includes(lesson.id) || false;
+                        const isDone = user?.completedLessons?.includes(lesson.id) || false;
                         return (
                           <div 
                             key={lesson.id}
@@ -178,15 +184,15 @@ export default function CourseDetail() {
                           >
                             <div className="flex items-center gap-3">
                               {isDone ? (
-                                <CheckCircle2 className="h-4.5 w-4.5 text-emerald-400 shrink-0" />
+                                <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500 shrink-0" />
                               ) : (
-                                <Circle className="h-4.5 w-4.5 text-slate-600 shrink-0" />
+                                <Circle className="h-4.5 w-4.5 text-slate-300 shrink-0" />
                               )}
                               <div className="space-y-0.5">
                                 {enrolled ? (
                                   <Link
                                     href={`/courses/${course.id}/lessons/${lesson.id}`}
-                                    className="font-bold text-slate-200 hover:text-blue-400 hover:underline transition-colors block text-sm"
+                                    className="font-bold text-slate-700 hover:text-indigo-600 hover:underline transition-colors block text-sm"
                                   >
                                     {lesson.title}
                                   </Link>
@@ -198,7 +204,7 @@ export default function CourseDetail() {
                                 <div className="flex items-center gap-2 text-slate-500 font-medium">
                                   <span>{lesson.duration}</span>
                                   <span>&bull;</span>
-                                  <span className="text-blue-400 font-semibold">+{lesson.xp} XP</span>
+                                  <span className="text-indigo-600 font-semibold">+{lesson.xp} XP</span>
                                 </div>
                               </div>
                             </div>
@@ -206,9 +212,9 @@ export default function CourseDetail() {
                             {enrolled && (
                               <Link
                                 href={`/courses/${course.id}/lessons/${lesson.id}`}
-                                className="rounded bg-slate-900 hover:bg-slate-800 p-2 border border-white/5 transition-all text-slate-300 hover:text-white"
+                                className="rounded bg-white hover:bg-indigo-50 p-2 border border-indigo-100/60 transition-all text-indigo-600 hover:text-indigo-700 shadow-sm"
                               >
-                                <Play className="h-3 w-3 fill-slate-300" />
+                                <Play className="h-3 w-3 fill-indigo-600" />
                               </Link>
                             )}
                           </div>
@@ -225,23 +231,23 @@ export default function CourseDetail() {
         {/* Right 1 Col: Learning Objectives / Info */}
         <div className="space-y-6">
           <div className="glass-panel p-6 rounded-xl space-y-4">
-            <h3 className="text-md font-bold text-white flex items-center gap-2 border-b border-white/5 pb-2">
-              <Target className="h-5 w-5 text-indigo-400" />
+            <h3 className="text-md font-bold text-slate-800 flex items-center gap-2 border-b border-indigo-100/60 pb-2">
+              <Target className="h-5 w-5 text-indigo-600" />
               What you will learn
             </h3>
             
             <ul className="space-y-3">
               {course.objectives.map((obj, i) => (
-                <li key={i} className="flex gap-2.5 items-start text-xs text-slate-300 leading-relaxed">
-                  <CheckCircle2 className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" />
+                <li key={i} className="flex gap-2.5 items-start text-xs text-slate-600 leading-relaxed">
+                  <CheckCircle2 className="h-4 w-4 text-indigo-600 shrink-0 mt-0.5" />
                   <span>{obj}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="glass-panel p-6 rounded-xl space-y-4 text-xs text-slate-400">
-            <h3 className="text-md font-bold text-white flex items-center gap-2 border-b border-white/5 pb-2">
+          <div className="glass-panel p-6 rounded-xl space-y-4 text-xs text-slate-500">
+            <h3 className="text-md font-bold text-slate-800 flex items-center gap-2 border-b border-indigo-100/60 pb-2">
               <Award className="h-5 w-5 text-amber-500" />
               Certificate Requirements
             </h3>

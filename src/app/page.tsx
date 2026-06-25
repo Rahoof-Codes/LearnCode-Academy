@@ -24,7 +24,7 @@ export default function Home() {
     visible: (i: number) => ({
       scale: 1,
       opacity: 1,
-      transition: { delay: i * 0.1, duration: 0.5, type: "spring", stiffness: 200 }
+      transition: { delay: i * 0.1, duration: 0.5, type: "spring" as const, stiffness: 200 }
     })
   };
 

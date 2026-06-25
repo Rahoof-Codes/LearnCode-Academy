@@ -9,7 +9,15 @@ import {
 import { Course } from "../../data/coursesData";
 
 export default function Dashboard() {
-  const { user, courses, resetProgress } = useApp();
+  const { user, courses, resetProgress, loading } = useApp();
+
+  if (loading) {
+    return (
+      <div className="flex flex-1 items-center justify-center p-12">
+        <span className="text-indigo-400 text-sm font-semibold animate-pulse">Loading dashboard...</span>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -18,7 +26,7 @@ export default function Dashboard() {
           <BookOpen className="h-12 w-12 text-indigo-300 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-slate-800 mb-2">No Active Session</h2>
           <p className="text-slate-400 text-sm mb-6">
-            Please make sure you are running in Demo Mode or authenticated.
+            Please make sure you are authenticated.
           </p>
           <Link
             href="/"

@@ -382,6 +382,20 @@ export const defaultCourses: Course[] = [
               3,
               "Inline styles written directly in HTML have the highest specificity (excluding !important)."
             )
+          },
+          {
+            id: "css-box-model",
+            title: "CSS Box Model Mechanics",
+            duration: "25 mins",
+            xp: 120,
+            contentFile: "css-box-model.md",
+            quiz: createQuickQuiz(
+              "CSS Box Model",
+              "Which property sets border and padding inside an element's declared width?",
+              ["box-sizing: border-box;", "box-sizing: content-box;", "layout-sizing: border;", "box-width: padding;"],
+              0,
+              "box-sizing: border-box calculates total width/height inclusive of border and padding."
+            )
           }
         ]
       },
@@ -401,6 +415,20 @@ export const defaultCourses: Course[] = [
               ["align-items", "justify-content", "align-content", "flex-direction"],
               1,
               "justify-content defines the alignment along the main axis of the flex container."
+            )
+          },
+          {
+            id: "css-grid",
+            title: "CSS Grid Layout Mechanics",
+            duration: "30 mins",
+            xp: 160,
+            contentFile: "css-grid.md",
+            quiz: createQuickQuiz(
+              "CSS Grid",
+              "Which property defines column sizes in a CSS Grid container?",
+              ["grid-columns", "grid-template-columns", "columns-width", "grid-layout-columns"],
+              1,
+              "grid-template-columns specifies the width and number of columns in CSS Grid."
             )
           }
         ]

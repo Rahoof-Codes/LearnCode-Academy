@@ -780,6 +780,18 @@ const HANDCRAFTED_COURSES: Record<string, HandcraftedLesson> = {
         options: ["div, p", "div > p", "div p", "div.p"],
         correctOption: 2,
         explanation: "div p selects all <p> descendants inside any <div>."
+      },
+      {
+        question: "How do you target an element with ID 'submit' in CSS?",
+        options: [".submit", "id(submit)", "#submit", "*submit"],
+        correctOption: 2,
+        explanation: "ID selectors are prefixed with a hash (#) symbol."
+      },
+      {
+        question: "What is the specificity score of a single class selector relative to an element selector?",
+        options: ["Class selector is higher", "Element selector is higher", "They are equal", "It is random"],
+        correctOption: 0,
+        explanation: "Class selectors have higher weight than element selectors."
       }
     ],
     task: {
@@ -799,6 +811,70 @@ const HANDCRAFTED_COURSES: Record<string, HandcraftedLesson> = {
           `Assert: .card selector styling matches padding and background -> ${hasCard ? "PASSED" : "FAILED"}`
         ];
         return { isPassed: hasH1 && hasCard, logs };
+      }
+    }
+  },
+  "css-box-model": {
+    title: "CSS Box Model: Margin, Padding & Borders",
+    content: [
+      "The CSS Box Model is the foundation of design and layout on the web. Every element in HTML is represented as a rectangular box, consisting of four layers: Content, Padding, Border, and Margin.",
+      "The Content layer contains the actual text or image. The Padding is the space directly surrounding the content inside the border. The Border wraps the padding and content. The Margin is the outermost space separating the element from its neighbors.",
+      "By default, when you set width and height on an element, CSS only sets it on the Content box. Adding padding and border makes the element larger than its set width.",
+      "To change this behavior, use `box-sizing: border-box;`. This forces the width and height to include the padding and border, making sizing highly predictable."
+    ],
+    quiz: [
+      {
+        question: "What are the four components of the CSS Box Model?",
+        options: ["Content, Text, Border, Margin", "Content, Padding, Border, Margin", "Content, Margin, Outline, Gap", "Margin, Padding, Outline, Frame"],
+        correctOption: 1,
+        explanation: "Content, Padding, Border, and Margin form the CSS Box Model."
+      },
+      {
+        question: "Which property includes border and padding inside an element's declared width and height?",
+        options: ["box-sizing: content-box;", "box-sizing: border-box;", "layout-sizing: include;", "box-width: collapse;"],
+        correctOption: 1,
+        explanation: "box-sizing: border-box calculates width and height inclusive of border and padding."
+      },
+      {
+        question: "What is the space between the element's content and its border called?",
+        options: ["Margin", "Padding", "Outline", "Spacing"],
+        correctOption: 1,
+        explanation: "Padding is the inner space around the content."
+      },
+      {
+        question: "What is the outermost layer of the CSS Box Model that separates elements?",
+        options: ["Border", "Padding", "Margin", "Background"],
+        correctOption: 2,
+        explanation: "Margin is the outer space around the border."
+      },
+      {
+        question: "If an element has width 100px, padding 20px, and margin 10px in content-box, what is its total visible rendered width?",
+        options: ["100px", "120px", "140px", "160px"],
+        correctOption: 2,
+        explanation: "Visible width = width (100) + left padding (20) + right padding (20) = 140px."
+      }
+    ],
+    task: {
+      description: "Create a CSS layout for class '.box' that sets 'box-sizing' to 'border-box', a width of '300px', padding of '20px', and a solid border of '2px' with color '#6366f1'.",
+      starterCode: `.box {\n  /* Add box properties */\n}`,
+      language: "css",
+      expectedOutput: ".box {\n  box-sizing: border-box;\n  width: 300px;\n  padding: 20px;\n  border: 2px solid #6366f1;\n}",
+      expectedOutputDisplay: "1. box-sizing set to border-box in class .box.\n2. Width set to 300px.\n3. Padding set to 20px.\n4. Border set to 2px solid #6366f1.",
+      validate: (code: string) => {
+        const clean = (s: string) => s.replace(/\s+/g, "").toLowerCase();
+        const cleanCode = clean(code);
+        const hasBoxSizing = /\.box\{[^}]*box-sizing:\s*border-box/i.test(cleanCode);
+        const hasWidth = /\.box\{[^}]*width:\s*300px/i.test(cleanCode);
+        const hasPadding = /\.box\{[^}]*padding:\s*20px/i.test(cleanCode);
+        const hasBorder = /\.box\{[^}]*border:\s*2px\s+solid\s+(#6366f1|rgb\(99,102,241\))/i.test(cleanCode);
+        const logs = [
+          "Evaluating CSS Box Model rules...",
+          `Assert: box-sizing: border-box; in .box -> ${hasBoxSizing ? "PASSED" : "FAILED"}`,
+          `Assert: width: 300px; in .box -> ${hasWidth ? "PASSED" : "FAILED"}`,
+          `Assert: padding: 20px; in .box -> ${hasPadding ? "PASSED" : "FAILED"}`,
+          `Assert: border: 2px solid #6366f1; in .box -> ${hasBorder ? "PASSED" : "FAILED"}`
+        ];
+        return { isPassed: hasBoxSizing && hasWidth && hasPadding && hasBorder, logs };
       }
     }
   },
@@ -828,6 +904,18 @@ const HANDCRAFTED_COURSES: Record<string, HandcraftedLesson> = {
         options: ["row", "column", "grid", "horizontal"],
         correctOption: 0,
         explanation: "The default value of flex-direction is row."
+      },
+      {
+        question: "Which flex-direction value displays items vertically from top to bottom?",
+        options: ["row", "row-reverse", "column", "column-reverse"],
+        correctOption: 2,
+        explanation: "column aligns flex items vertically from top to bottom."
+      },
+      {
+        question: "Which property controls whether flex items should shrink when container space is tight?",
+        options: ["flex-grow", "flex-shrink", "flex-wrap", "flex-basis"],
+        correctOption: 1,
+        explanation: "flex-shrink determines how much a flex item will shrink relative to other items."
       }
     ],
     task: {
@@ -849,6 +937,68 @@ const HANDCRAFTED_COURSES: Record<string, HandcraftedLesson> = {
           `Assert: align-items: center; in .navbar -> ${hasAlign ? "PASSED" : "FAILED"}`
         ];
         return { isPassed: hasFlex && hasJustify && hasAlign, logs };
+      }
+    }
+  },
+  "css-grid": {
+    title: "CSS Grid Layout Mechanics",
+    content: [
+      "CSS Grid Layout is a two-dimensional grid-based layout system, designed to handle both columns and rows. Unlike Flexbox, which is primarily one-dimensional, Grid excels at aligning content in structured grids.",
+      "A grid layout is created by defining a container with `display: grid;`. You specify columns using `grid-template-columns` and rows using `grid-template-rows`.",
+      "Column and row sizing can use traditional pixels, percentages, or the modern fractional unit `fr` (e.g., `1fr 2fr` distributes the remaining space in a 1:2 ratio).",
+      "Adding gaps between grid rows and columns is handled easily using the `gap` property. This replaces the old approach of using margins for spacing inside grid cards."
+    ],
+    quiz: [
+      {
+        question: "What dimension layout system is CSS Grid?",
+        options: ["One-dimensional", "Two-dimensional", "Three-dimensional", "Zero-dimensional"],
+        correctOption: 1,
+        explanation: "CSS Grid is a two-dimensional layout system that handles both columns and rows."
+      },
+      {
+        question: "Which unit is used in CSS Grid to represent a fraction of the free space in the container?",
+        options: ["fr", "px", "%", "em"],
+        correctOption: 0,
+        explanation: "The 'fr' unit represents a fraction of the remaining space in the grid."
+      },
+      {
+        question: "Which property sets the size of columns in a CSS Grid container?",
+        options: ["grid-columns", "grid-template-columns", "columns-width", "grid-layout-columns"],
+        correctOption: 1,
+        explanation: "grid-template-columns defines the column structure of the grid."
+      },
+      {
+        question: "Which property sets the spacing between columns and rows in CSS Grid?",
+        options: ["margin", "padding", "gap", "grid-spacing"],
+        correctOption: 2,
+        explanation: "The gap property specifies the space between columns and rows."
+      },
+      {
+        question: "How do you create a grid with columns of 100px, remaining space, and remaining space in 1:2 ratio?",
+        options: ["grid-template-columns: 100px 1fr 2fr;", "grid-template-columns: 100px 50% 50%;", "grid-template-columns: 100px auto auto;", "grid-template-columns: 100px 1 2;"],
+        correctOption: 0,
+        explanation: "'100px 1fr 2fr' allocates 100px first, then divides remaining space in 1:2 ratio."
+      }
+    ],
+    task: {
+      description: "Create a CSS layout for class '.grid-container' that uses CSS Grid, defines three equal-width columns ('1fr 1fr 1fr'), and sets a gap of '16px'.",
+      starterCode: `.grid-container {\n  display: grid;\n  /* Add template and gap */\n}`,
+      language: "css",
+      expectedOutput: ".grid-container {\n  display: grid;\n  grid-template-columns: 1fr 1fr 1fr;\n  gap: 16px;\n}",
+      expectedOutputDisplay: "1. display set to grid in class .grid-container.\n2. Columns set to three equal-width fractions (1fr 1fr 1fr).\n3. Grid gap set to 16px.",
+      validate: (code: string) => {
+        const clean = (s: string) => s.replace(/\s+/g, "").toLowerCase();
+        const cleanCode = clean(code);
+        const hasGrid = /\.grid-container\{[^}]*display:\s*grid/i.test(cleanCode);
+        const hasColumns = /\.grid-container\{[^}]*grid-template-columns:\s*1fr\s+1fr\s+1fr/i.test(cleanCode);
+        const hasGap = /\.grid-container\{[^}]*gap:\s*16px/i.test(cleanCode);
+        const logs = [
+          "Evaluating CSS Grid rules...",
+          `Assert: display: grid; in .grid-container -> ${hasGrid ? "PASSED" : "FAILED"}`,
+          `Assert: grid-template-columns: 1fr 1fr 1fr; in .grid-container -> ${hasColumns ? "PASSED" : "FAILED"}`,
+          `Assert: gap: 16px; in .grid-container -> ${hasGap ? "PASSED" : "FAILED"}`
+        ];
+        return { isPassed: hasGrid && hasColumns && hasGap, logs };
       }
     }
   },
@@ -1101,7 +1251,14 @@ export default function LessonWorkspace() {
   const courseId = params.courseId as string;
   const lessonId = params.lessonId as string;
 
-  const { courses, user, completeLesson, completeQuiz, isFirebaseActive } = useApp();
+  const { courses, user, completeLesson, completeQuiz, isFirebaseActive, loading } = useApp();
+
+  // Redirect guest users to sign-in page
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/signin");
+    }
+  }, [user, loading, router]);
   const course = courses.find((c) => c.id === courseId);
 
   // Dynamic syllabus modules injection specifically for html course
@@ -1263,8 +1420,8 @@ export default function LessonWorkspace() {
     }
   };
 
-  // Get Tamil translation for the current lesson (if HTML course and Tamil selected)
-  const tamilData: TamilLesson | null = (courseId === "html" && courseLang === "ta") ? (TAMIL_COURSES[lessonId] || null) : null;
+  // Get Tamil translation for the current lesson (if HTML/CSS course and Tamil selected)
+  const tamilData: TamilLesson | null = ((courseId === "html" || courseId === "css") && courseLang === "ta") ? (TAMIL_COURSES[lessonId] || null) : null;
 
   // States
   const [activeTab, setActiveTab] = useState<"content" | "quiz" | "task">("content");
@@ -1283,7 +1440,6 @@ export default function LessonWorkspace() {
   const [editorCode, setEditorCode] = useState("");
   const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
   const [isRunning, setIsRunning] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Console Tab Controller: "logs" | "preview"
   const [consoleTab, setConsoleTab] = useState<"logs" | "preview">("logs");
@@ -1319,7 +1475,7 @@ export default function LessonWorkspace() {
     setQuizFinished(false);
     
     // Automatically open to appropriate tab
-    if (user?.completedLessons.includes(lessonId)) {
+    if (user?.completedLessons?.includes(lessonId)) {
       setActiveTab("task");
     } else {
       setActiveTab("content");
@@ -1349,7 +1505,7 @@ export default function LessonWorkspace() {
   }
 
   // Calculate Course Progress Bar
-  const completedInCourseCount = allLessons.filter(l => user?.completedLessons.includes(l.id)).length;
+  const completedInCourseCount = allLessons.filter(l => user?.completedLessons?.includes(l.id) || false).length;
   const overallProgress = allLessons.length > 0 ? Math.round((completedInCourseCount / allLessons.length) * 100) : 0;
 
   // Next/Previous navigation
@@ -1357,7 +1513,7 @@ export default function LessonWorkspace() {
   const nextLesson = currentLessonIdx < allLessons.length - 1 ? allLessons[currentLessonIdx + 1] : null;
 
   const getTopicStatus = (lesId: string) => {
-    if (user?.completedLessons.includes(lesId)) {
+    if (user?.completedLessons?.includes(lesId)) {
       return "completed";
     }
     const idx = allLessons.findIndex(l => l.id === lesId);
@@ -1366,7 +1522,7 @@ export default function LessonWorkspace() {
     
     // Unlocked if previous is completed
     const prevLes = allLessons[idx - 1];
-    if (user?.completedLessons.includes(prevLes.id)) {
+    if (user?.completedLessons?.includes(prevLes.id)) {
       return "unlocked";
     }
     return "locked";
@@ -1455,40 +1611,14 @@ export default function LessonWorkspace() {
     });
   };
 
-  // Run Code logic
-  const handleRunCode = async () => {
+  // Run & Verify Code logic
+  const handleRunAndVerifyCode = async () => {
     setIsRunning(true);
-    setConsoleLogs(["Initializing compilation sandbox...", `Setting runtime: ${activeLessonData.task.language.toUpperCase()} environment`]);
-    
-    setTimeout(async () => {
-      if (lessonId === "js-promises") {
-        const res = await runAsyncCode(editorCode);
-        setConsoleLogs(res.logs);
-        setConsoleTab("logs");
-      } else {
-        const res = activeLessonData.task.validate(editorCode);
-        setConsoleLogs([
-          "Compilation successful.",
-          "Code executed with return output:",
-          ...res.logs,
-          "",
-          "Process completed with exit code: 0"
-        ]);
-        // Swap tab to visual output when run HTML/CSS
-        if (activeLessonData.task.language === "html" || activeLessonData.task.language === "css") {
-          setConsoleTab("preview");
-        } else {
-          setConsoleTab("logs");
-        }
-      }
-      setIsRunning(false);
-    }, 800);
-  };
-
-  // Submit Code logic
-  const handleSubmitCode = async () => {
-    setIsSubmitting(true);
-    setConsoleLogs(["Initializing compiler assertions...", "Running Test Suite..."]);
+    setConsoleLogs([
+      "Initializing compilation sandbox...",
+      `Setting runtime: ${activeLessonData.task.language.toUpperCase()} environment`,
+      "Running compiler assertions & executing code..."
+    ]);
     setConsoleTab("logs");
     
     setTimeout(async () => {
@@ -1499,16 +1629,19 @@ export default function LessonWorkspace() {
         validationResult = activeLessonData.task.validate(editorCode);
       }
       
-      setConsoleLogs(validationResult.logs);
-      
+      const newLogs = [
+        "Compilation successful.",
+        "Code executed successfully.",
+        ...validationResult.logs
+      ];
+
       if (validationResult.isPassed) {
-        setConsoleLogs(prev => [
-          ...prev,
+        newLogs.push(
           "",
           "STATUS: ALL ASSERTIONS PASSED! 🎉",
-          "Confetti fired!",
           `Earned: +${currentLesson.xp} Lesson Completion XP!`
-        ]);
+        );
+        setConsoleLogs(newLogs);
         
         // Trigger Confetti
         confetti({
@@ -1532,21 +1665,28 @@ export default function LessonWorkspace() {
             console.error("Firestore sync task status failed:", err);
           }
         }
+        
+        // Swap tab to visual output when run HTML/CSS to show what they built
+        if (activeLessonData.task.language === "html" || activeLessonData.task.language === "css") {
+          setTimeout(() => {
+            setConsoleTab("preview");
+          }, 1500);
+        }
       } else {
-        setConsoleLogs(prev => [
-          ...prev,
+        newLogs.push(
           "",
           "STATUS: ASSERTIONS FAILED. ❌ Please review expected output logic and correct rules."
-        ]);
+        );
+        setConsoleLogs(newLogs);
       }
-      setIsSubmitting(false);
+      setIsRunning(false);
     }, 1200);
   };
 
   // Format markdown helper
   const renderMD = (paragraphs: string[]) => {
     return paragraphs.map((para, i) => (
-      <p key={i} className="text-slate-300 text-sm leading-relaxed mb-4">{para}</p>
+      <p key={i} className="text-slate-600 text-sm leading-relaxed mb-4">{para}</p>
     ));
   };
 
@@ -1554,46 +1694,46 @@ export default function LessonWorkspace() {
   const modulesToRender = courseId === "html" ? courseModules : (course ? course.modules : []);
 
   return (
-    <div className="flex flex-col flex-1 h-[calc(100vh-62px)] overflow-hidden bg-slate-950">
+    <div className="flex flex-col flex-1 h-[calc(100vh-62px)] overflow-hidden bg-slate-50/50">
       
       {/* Top Header / Completion Bar */}
-      <div className="glass-panel border-b border-white/5 px-6 py-3 flex flex-wrap gap-4 items-center justify-between bg-slate-950/90 z-20">
+      <div className="glass-panel border-b border-indigo-100/60 px-6 py-3 flex flex-wrap gap-4 items-center justify-between bg-white/90 z-20">
         <div className="flex items-center gap-4">
           <Link 
             href={`/courses/${courseId}`} 
-            className="text-xs font-bold text-slate-400 hover:text-white flex items-center gap-1.5 transition-colors"
+            className="text-xs font-bold text-slate-500 hover:text-indigo-600 flex items-center gap-1.5 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" /> Syllabus
           </Link>
-          <span className="text-slate-500 font-medium">|</span>
+          <span className="text-slate-300 font-medium">|</span>
           <div className="flex flex-col">
-            <span className="text-2xs font-extrabold text-slate-500 uppercase tracking-wider">Active Lesson</span>
-            <span className="text-xs font-bold text-white truncate max-w-[250px]">{currentLesson.title}</span>
+            <span className="text-2xs font-extrabold text-slate-400 uppercase tracking-wider">Active Lesson</span>
+            <span className="text-xs font-bold text-slate-800 truncate max-w-[250px]">{currentLesson.title}</span>
           </div>
         </div>
 
         {/* Progress bar centered */}
         <div className="flex items-center gap-3 flex-1 max-w-md mx-auto justify-center">
-          <span className="text-2xs font-bold text-slate-400 whitespace-nowrap">Course Progress:</span>
-          <div className="w-full bg-slate-800/80 h-2.5 rounded-full overflow-hidden relative border border-white/5">
+          <span className="text-2xs font-bold text-slate-500 whitespace-nowrap">Course Progress:</span>
+          <div className="w-full bg-indigo-50 h-2.5 rounded-full overflow-hidden relative border border-indigo-100/50">
             <div 
-              className="bg-gradient-to-r from-blue-500 to-indigo-500 h-full transition-all duration-500 rounded-full"
+              className="bg-gradient-to-r from-indigo-500 to-violet-500 h-full transition-all duration-500 rounded-full"
               style={{ width: `${overallProgress}%` }}
             />
           </div>
-          <span className="text-xs font-extrabold text-blue-400 whitespace-nowrap">{overallProgress}%</span>
+          <span className="text-xs font-extrabold text-indigo-600 whitespace-nowrap">{overallProgress}%</span>
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Language Toggle — only for HTML course */}
-          {courseId === "html" && (
-            <div className="flex items-center gap-1 rounded-lg bg-slate-900 border border-white/5 p-0.5">
+          {/* Language Toggle — for HTML & CSS courses */}
+          {(courseId === "html" || courseId === "css") && (
+            <div className="flex items-center gap-1 rounded-lg bg-slate-100 border border-indigo-100/50 p-0.5">
               <button
                 onClick={() => toggleLanguage("en")}
                 className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-2xs font-extrabold transition-all cursor-pointer ${
                   courseLang === "en"
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
-                    : "text-slate-400 hover:text-white hover:bg-white/5"
+                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
+                    : "text-slate-500 hover:text-indigo-600 hover:bg-slate-50"
                 }`}
               >
                 <span>🇬🇧</span> English
@@ -1603,7 +1743,7 @@ export default function LessonWorkspace() {
                 className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-2xs font-extrabold transition-all cursor-pointer ${
                   courseLang === "ta"
                     ? "bg-orange-500 text-white shadow-md shadow-orange-500/20"
-                    : "text-slate-400 hover:text-white hover:bg-white/5"
+                    : "text-slate-500 hover:text-orange-600 hover:bg-slate-50"
                 }`}
               >
                 <span>🇮🇳</span> தமிழ்
@@ -1615,7 +1755,7 @@ export default function LessonWorkspace() {
             <button
               onClick={() => router.push(`/courses/${courseId}/lessons/${prevLesson.id}`)}
               title="Previous Lesson"
-              className="rounded bg-slate-900 hover:bg-slate-800 border border-white/5 p-1.5 text-slate-400 hover:text-white transition-all cursor-pointer"
+              className="rounded bg-white hover:bg-indigo-50 border border-indigo-100/60 p-1.5 text-slate-500 hover:text-indigo-600 transition-all cursor-pointer"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
@@ -1624,7 +1764,7 @@ export default function LessonWorkspace() {
             <button
               onClick={() => router.push(`/courses/${courseId}/lessons/${nextLesson.id}`)}
               title="Next Lesson"
-              className="rounded bg-slate-900 hover:bg-slate-800 border border-white/5 p-1.5 text-slate-400 hover:text-white transition-all cursor-pointer"
+              className="rounded bg-white hover:bg-indigo-50 border border-indigo-100/60 p-1.5 text-slate-500 hover:text-indigo-600 transition-all cursor-pointer"
             >
               <ArrowRight className="h-4 w-4" />
             </button>
@@ -1635,17 +1775,17 @@ export default function LessonWorkspace() {
       <div className="flex flex-1 flex-col lg:flex-row overflow-hidden relative">
         
         {/* ================= LEFT COLUMN: TOPIC SELECTOR SIDEBAR ================= */}
-        <div className="w-64 border-r border-white/5 bg-slate-950/20 flex flex-col h-full shrink-0 hidden md:flex">
-          <div className="p-4 border-b border-white/5 flex items-center justify-between bg-slate-950/40">
+        <div className="w-64 border-r border-indigo-100/60 bg-white/50 flex flex-col h-full shrink-0 hidden md:flex">
+          <div className="p-4 border-b border-indigo-100/50 flex items-center justify-between bg-slate-50/50">
             <span className="text-2xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-              <LayoutList className="h-3.5 w-3.5 text-blue-400" /> Curriculum
+              <LayoutList className="h-3.5 w-3.5 text-indigo-500" /> Curriculum
             </span>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {modulesToRender.map((mod) => (
               <div key={mod.id} className="space-y-1.5">
-                <h3 className="text-3xs font-extrabold text-slate-500 uppercase tracking-widest pl-2">
+                <h3 className="text-3xs font-extrabold text-slate-400 uppercase tracking-widest pl-2">
                   {mod.title}
                 </h3>
                 
@@ -1654,11 +1794,11 @@ export default function LessonWorkspace() {
                     const status = getTopicStatus(les.id);
                     const isActive = les.id === lessonId;
                     
-                    let statusIcon = <Lock className="h-3.5 w-3.5 text-slate-600 shrink-0" />;
+                    let statusIcon = <Lock className="h-3.5 w-3.5 text-slate-300 shrink-0" />;
                     if (status === "completed") {
-                      statusIcon = <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />;
+                      statusIcon = <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />;
                     } else if (status === "unlocked") {
-                      statusIcon = <div className="h-3 w-3 rounded-full border border-slate-500 shrink-0" />;
+                      statusIcon = <div className="h-3 w-3 rounded-full border border-slate-400 shrink-0" />;
                     }
 
                     return (
@@ -1668,10 +1808,10 @@ export default function LessonWorkspace() {
                         onClick={() => router.push(`/courses/${courseId}/lessons/${les.id}`)}
                         className={`w-full flex items-center justify-between gap-2.5 rounded-lg px-2.5 py-2.5 text-xs transition-all text-left ${
                           isActive
-                            ? "bg-blue-600/15 border border-blue-500/35 text-white font-bold"
+                            ? "bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold"
                             : status === "locked"
-                            ? "text-slate-600 cursor-not-allowed opacity-50"
-                            : "text-slate-400 hover:bg-white/5 hover:text-white"
+                            ? "text-slate-400 cursor-not-allowed opacity-50"
+                            : "text-slate-600 hover:bg-indigo-50/50 hover:text-indigo-600"
                         }`}
                       >
                         <span className="truncate flex-1">{les.title}</span>
@@ -1686,16 +1826,16 @@ export default function LessonWorkspace() {
         </div>
 
         {/* ================= MIDDLE COLUMN: LESSON / QUIZ / TASK TABS ================= */}
-        <div className="w-full lg:w-1/2 flex flex-col border-r border-white/5 bg-slate-900/10 overflow-hidden">
+        <div className="w-full lg:w-1/2 flex flex-col border-r border-indigo-100/60 bg-white overflow-hidden">
           
           {/* Tab Switcher Headers */}
-          <div className="flex border-b border-white/5 bg-slate-950/40 p-1.5 gap-1.5 shrink-0">
+          <div className="flex border-b border-indigo-100/50 bg-slate-50 p-1.5 gap-1.5 shrink-0">
             <button
               onClick={() => setActiveTab("content")}
               className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === "content"
-                  ? "bg-slate-800 text-white shadow"
-                  : "text-slate-400 hover:text-white hover:bg-white/5"
+                  ? "bg-white text-indigo-600 border border-indigo-100/60 shadow-sm"
+                  : "text-slate-500 hover:text-indigo-600 hover:bg-white/50"
               }`}
             >
               <BookOpen className="h-3.5 w-3.5" />
@@ -1706,15 +1846,15 @@ export default function LessonWorkspace() {
               disabled={!contentRead}
               onClick={() => setActiveTab("quiz")}
               className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer ${
-                !contentRead ? "opacity-40 cursor-not-allowed text-slate-600" : ""
+                !contentRead ? "opacity-40 cursor-not-allowed text-slate-400" : ""
               } ${
                 activeTab === "quiz"
-                  ? "bg-slate-800 text-white shadow"
-                  : "text-slate-400 hover:text-white hover:bg-white/5"
+                  ? "bg-white text-indigo-600 border border-indigo-100/60 shadow-sm"
+                  : "text-slate-500 hover:text-indigo-600 hover:bg-white/50"
               }`}
             >
               {quizPassed ? (
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
               ) : (
                 <Award className="h-3.5 w-3.5" />
               )}
@@ -1725,17 +1865,17 @@ export default function LessonWorkspace() {
               disabled={!quizPassed}
               onClick={() => setActiveTab("task")}
               className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer ${
-                !quizPassed ? "opacity-40 cursor-not-allowed text-slate-600" : ""
+                !quizPassed ? "opacity-40 cursor-not-allowed text-slate-400" : ""
               } ${
                 activeTab === "task"
-                  ? "bg-slate-800 text-white shadow"
-                  : "text-slate-400 hover:text-white hover:bg-white/5"
+                  ? "bg-white text-indigo-600 border border-indigo-100/60 shadow-sm"
+                  : "text-slate-500 hover:text-indigo-600 hover:bg-white/50"
               }`}
             >
               {!quizPassed ? (
-                <Lock className="h-3.5 w-3.5 text-slate-500" />
+                <Lock className="h-3.5 w-3.5 text-slate-400" />
               ) : (
-                <Cpu className="h-3.5 w-3.5 text-indigo-400" />
+                <Cpu className="h-3.5 w-3.5 text-indigo-500" />
               )}
               Coding Task
             </button>
@@ -1753,21 +1893,21 @@ export default function LessonWorkspace() {
             {activeTab === "content" && (
               <div className="space-y-6 max-w-2xl mx-auto w-full">
                 <div className="space-y-2">
-                  <h1 className="text-2xl font-extrabold text-white tracking-tight">{tamilData ? tamilData.title : activeLessonData.title}</h1>
-                  <div className="h-1 w-20 bg-blue-600 rounded-full" />
+                  <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">{tamilData ? tamilData.title : activeLessonData.title}</h1>
+                  <div className="h-1 w-20 bg-indigo-600 rounded-full" />
                   {tamilData && (
-                    <span className="inline-flex items-center gap-1 text-2xs font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">
+                    <span className="inline-flex items-center gap-1 text-2xs font-bold text-orange-600 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">
                       <Languages className="h-3 w-3" /> தமிழில் படிக்கிறீர்கள்
                     </span>
                   )}
                 </div>
                 
-                <article className="prose prose-invert max-w-none text-slate-300 animate-fade-in">
+                <article className="prose max-w-none text-slate-600 animate-fade-in">
                   {renderMD(tamilData ? tamilData.content : activeLessonData.content)}
                 </article>
 
                 {/* Sticky scroll instructions / Take Quiz CTA */}
-                <div className="pt-8 border-t border-white/5 flex flex-col items-center">
+                <div className="pt-8 border-t border-indigo-100/50 flex flex-col items-center">
                   {!contentRead ? (
                     <div className="text-xs text-slate-500 font-semibold animate-pulse text-center">
                       Please read through all paragraphs to unlock the quiz...
@@ -1775,7 +1915,7 @@ export default function LessonWorkspace() {
                   ) : (
                     <button
                       onClick={() => setActiveTab("quiz")}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-6 py-3 transition-all hover:scale-103 shadow-md shadow-blue-600/10 cursor-pointer"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-6 py-3 transition-all hover:scale-103 shadow-md shadow-indigo-600/10 cursor-pointer"
                     >
                       Take Lesson Quiz <ChevronRight className="h-4 w-4" />
                     </button>
@@ -1788,14 +1928,14 @@ export default function LessonWorkspace() {
             {activeTab === "quiz" && (
               <div className="max-w-xl mx-auto w-full">
                 {quizFinished ? (
-                  <div className="glass-panel p-6 rounded-xl border border-white/10 space-y-5 text-center mt-4 bg-slate-900/30">
-                    <Award className={`h-16 w-16 mx-auto ${quizPassed ? "text-amber-400" : "text-slate-600"}`} />
+                  <div className="glass-panel p-6 rounded-xl border border-indigo-100/50 space-y-5 text-center mt-4">
+                    <Award className={`h-16 w-16 mx-auto ${quizPassed ? "text-amber-400" : "text-slate-400"}`} />
                     <div className="space-y-2">
-                      <h3 className="text-xl font-bold text-white">Quiz Completed</h3>
-                      <p className="text-slate-300 text-sm">
-                        You scored <span className="font-extrabold text-blue-400">{correctCount}</span> out of{" "}
-                        <span className="font-extrabold text-white">{activeLessonData.quiz.length}</span> (
-                        <span className="font-extrabold text-indigo-400">
+                      <h3 className="text-xl font-bold text-slate-800">Quiz Completed</h3>
+                      <p className="text-slate-600 text-sm">
+                        You scored <span className="font-extrabold text-indigo-600">{correctCount}</span> out of{" "}
+                        <span className="font-extrabold text-slate-800">{activeLessonData.quiz.length}</span> (
+                        <span className="font-extrabold text-indigo-600">
                           {Math.round((correctCount / activeLessonData.quiz.length) * 100)}%
                         </span>).
                       </p>
@@ -1803,27 +1943,27 @@ export default function LessonWorkspace() {
 
                     {quizPassed ? (
                       <div className="space-y-4">
-                        <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-4 py-1.5 text-xs font-bold text-emerald-400">
+                        <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-4 py-1.5 text-xs font-bold text-emerald-600">
                           <CheckCircle2 className="h-4 w-4" /> Passed (Requires ≥ 60%)
                         </div>
-                        <p className="text-xs text-slate-400 leading-relaxed max-w-sm mx-auto">
+                        <p className="text-xs text-slate-500 leading-relaxed max-w-sm mx-auto">
                           Awesome job! You have passed the quiz and unlocked the coding sandbox task.
                         </p>
                         <button
                           onClick={() => setActiveTab("task")}
-                          className="w-full rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 py-3 text-xs font-bold text-white transition-all shadow-md cursor-pointer"
+                          className="w-full rounded-lg bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 py-3 text-xs font-bold text-white transition-all shadow-md cursor-pointer"
                         >
                           Start Coding Task
                         </button>
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        <div className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 px-4 py-1.5 text-xs font-bold text-rose-400">
+                        <div className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 border border-rose-200 px-4 py-1.5 text-xs font-bold text-rose-600">
                           <XCircle className="h-4 w-4" /> Failed (Requires ≥ 60%)
                         </div>
                         <button
                           onClick={handleQuizRetry}
-                          className="flex items-center justify-center gap-1.5 w-full rounded-lg bg-slate-800 hover:bg-slate-700 py-3 text-xs font-bold text-white transition-all cursor-pointer border border-white/5"
+                          className="flex items-center justify-center gap-1.5 w-full rounded-lg bg-slate-100 hover:bg-slate-200 py-3 text-xs font-bold text-slate-700 transition-all cursor-pointer border border-slate-200"
                         >
                           <RefreshCw className="h-3.5 w-3.5" />
                           Retry Quiz
@@ -1832,18 +1972,18 @@ export default function LessonWorkspace() {
                     )}
                   </div>
                 ) : (
-                  <div className="glass-panel p-6 rounded-xl border border-white/10 space-y-6 bg-slate-900/30">
+                  <div className="glass-panel p-6 rounded-xl border border-indigo-100/50 space-y-6">
                     
                     {/* Quiz Progress */}
-                    <div className="flex items-center justify-between border-b border-white/5 pb-3">
-                      <span className="text-2xs font-extrabold text-blue-400 uppercase tracking-widest">Lesson Quiz Assessment</span>
+                    <div className="flex items-center justify-between border-b border-indigo-100/50 pb-3">
+                      <span className="text-2xs font-extrabold text-indigo-600 uppercase tracking-widest">Lesson Quiz Assessment</span>
                       <span className="text-xs text-slate-400">
                         Question {currentQuestionIdx + 1} of {activeLessonData.quiz.length}
                       </span>
                     </div>
 
                     {/* Question Text */}
-                    <h4 className="text-sm font-bold text-white leading-relaxed">
+                    <h4 className="text-sm font-bold text-slate-800 leading-relaxed">
                       {tamilData ? tamilData.quiz[currentQuestionIdx]?.question : activeLessonData.quiz[currentQuestionIdx].question}
                     </h4>
 
@@ -1853,16 +1993,16 @@ export default function LessonWorkspace() {
                         const isSelected = selectedOption === idx;
                         const isCorrect = idx === activeLessonData.quiz[currentQuestionIdx].correctOption;
                         
-                        let btnStyle = "bg-slate-950/40 border-white/5 text-slate-300 hover:bg-white/5";
-                        if (isSelected) btnStyle = "bg-blue-600/10 border-blue-500/40 text-blue-400";
+                        let btnStyle = "bg-slate-50 border-indigo-100/60 text-slate-700 hover:bg-indigo-50/50 hover:text-indigo-600";
+                        if (isSelected) btnStyle = "bg-indigo-50 border-indigo-500/50 text-indigo-600 font-bold";
                         
                         if (isAnswered) {
                           if (isCorrect) {
-                            btnStyle = "bg-emerald-500/10 border-emerald-500/40 text-emerald-400 font-bold";
+                            btnStyle = "bg-emerald-50 border-emerald-500/30 text-emerald-700 font-bold";
                           } else if (isSelected) {
-                            btnStyle = "bg-rose-500/10 border-rose-500/40 text-rose-400 font-semibold";
+                            btnStyle = "bg-rose-50 border-rose-500/30 text-rose-700 font-semibold";
                           } else {
-                            btnStyle = "bg-slate-950/20 border-white/5 text-slate-600 opacity-60";
+                            btnStyle = "bg-slate-50 border-indigo-100/30 text-slate-400 opacity-60";
                           }
                         }
 
@@ -1877,14 +2017,14 @@ export default function LessonWorkspace() {
                           >
                             <div className="flex items-center gap-3">
                               <span className={`h-5 w-5 rounded-full flex items-center justify-center text-3xs font-extrabold border ${
-                                isSelected ? "bg-blue-500/20 border-blue-500 text-blue-400" : "bg-slate-950 border-white/10 text-slate-400"
+                                isSelected ? "bg-indigo-100 border-indigo-500 text-indigo-700" : "bg-white border-slate-200 text-slate-500"
                               }`}>
                                 {optionLetters[idx]}
                               </span>
                               <span>{tamilData ? (tamilData.quiz[currentQuestionIdx]?.options[idx] || opt) : opt}</span>
                             </div>
-                            {isAnswered && isCorrect && <CheckCircle2 className="h-4.5 w-4.5 text-emerald-400 shrink-0" />}
-                            {isAnswered && isSelected && !isCorrect && <AlertCircle className="h-4.5 w-4.5 text-rose-400 shrink-0" />}
+                            {isAnswered && isCorrect && <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500 shrink-0" />}
+                            {isAnswered && isSelected && !isCorrect && <AlertCircle className="h-4.5 w-4.5 text-rose-500 shrink-0" />}
                           </button>
                         );
                       })}
@@ -1895,8 +2035,8 @@ export default function LessonWorkspace() {
                       {isAnswered && (
                         <div className={`p-4 rounded-lg text-xs leading-relaxed border ${
                           selectedOption === activeLessonData.quiz[currentQuestionIdx].correctOption
-                            ? "bg-emerald-500/5 border-emerald-500/10 text-slate-300"
-                            : "bg-rose-500/5 border-rose-500/10 text-slate-300"
+                            ? "bg-emerald-50/50 border-emerald-250 text-slate-600"
+                            : "bg-rose-50/50 border-rose-250 text-slate-600"
                         }`}>
                           <span className="font-bold block mb-1">
                             {selectedOption === activeLessonData.quiz[currentQuestionIdx].correctOption ? "Correct!" : "Incorrect."}
@@ -1911,8 +2051,8 @@ export default function LessonWorkspace() {
                           onClick={handleQuizSubmit}
                           className={`w-full rounded-lg py-2.5 text-xs font-bold text-white transition-all text-center cursor-pointer ${
                             selectedOption === null 
-                              ? "bg-slate-800 text-slate-500 border border-slate-700/50 cursor-not-allowed" 
-                              : "bg-blue-600 hover:bg-blue-500"
+                              ? "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed" 
+                              : "bg-indigo-600 hover:bg-indigo-500"
                           }`}
                         >
                           Submit Answer
@@ -1920,7 +2060,7 @@ export default function LessonWorkspace() {
                       ) : (
                         <button
                           onClick={handleQuizNext}
-                          className="flex items-center justify-center gap-1 w-full rounded-lg bg-blue-600 hover:bg-blue-500 py-2.5 text-xs font-bold text-white transition-all text-center cursor-pointer"
+                          className="flex items-center justify-center gap-1 w-full rounded-lg bg-indigo-600 hover:bg-indigo-500 py-2.5 text-xs font-bold text-white transition-all text-center cursor-pointer"
                         >
                           <span>{currentQuestionIdx < activeLessonData.quiz.length - 1 ? "Next Question" : "Finish Quiz"}</span>
                           <ChevronRight className="h-4 w-4" />
@@ -1937,44 +2077,44 @@ export default function LessonWorkspace() {
             {activeTab === "task" && (
               <div className="space-y-6 max-w-2xl mx-auto w-full animate-fade-in">
                 <div className="space-y-2">
-                  <span className="text-3xs font-extrabold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  <span className="text-3xs font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
                     Coding Challenge
                   </span>
-                  <h2 className="text-xl font-bold text-white">Task Instructions</h2>
+                  <h2 className="text-xl font-bold text-slate-800">Task Instructions</h2>
                 </div>
 
-                <div className="glass-panel p-5 rounded-lg border border-white/5 bg-slate-900/30 space-y-4">
-                  <p className="text-slate-300 text-sm leading-relaxed font-medium">
+                <div className="glass-panel p-5 rounded-lg border border-indigo-100/50 space-y-4">
+                  <p className="text-slate-600 text-sm leading-relaxed font-medium">
                     {tamilData ? tamilData.taskDescription : activeLessonData.task.description}
                   </p>
 
                   <div className="space-y-1.5">
                     <span className="text-2xs font-extrabold text-slate-500 uppercase tracking-wide block">Expected Structural Result:</span>
-                    <div className="p-3 bg-black/60 rounded text-xs font-mono text-slate-300 overflow-x-auto border border-white/5 select-text whitespace-pre-line leading-relaxed">
+                    <div className="p-3 bg-slate-50 rounded text-xs font-mono text-slate-600 overflow-x-auto border border-slate-200 select-text whitespace-pre-line leading-relaxed">
                       {activeLessonData.task.expectedOutputDisplay}
                     </div>
                   </div>
                 </div>
 
                 {isLessonCompleted ? (
-                  <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="p-4 rounded-lg bg-emerald-50 border border-emerald-200 flex flex-col md:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-                      <span className="text-xs font-bold text-emerald-400">Task Completed & Verified!</span>
+                      <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                      <span className="text-xs font-bold text-emerald-600">Task Completed & Verified!</span>
                     </div>
                     {nextLesson && (
                       <button
                         onClick={() => router.push(`/courses/${courseId}/lessons/${nextLesson.id}`)}
-                        className="w-full md:w-auto inline-flex items-center gap-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs px-5 py-2 rounded-lg transition-all cursor-pointer"
+                        className="w-full md:w-auto inline-flex items-center gap-1 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-bold text-xs px-5 py-2 rounded-lg transition-all cursor-pointer"
                       >
                         Next Lesson <ArrowRight className="h-3.5 w-3.5" />
                       </button>
                     )}
                   </div>
                 ) : (
-                  <div className="text-center p-4 bg-slate-900/10 border border-dashed border-white/5 rounded-lg">
-                    <p className="text-xs text-slate-400 font-semibold leading-relaxed">
-                      Use the code sandbox on the right to implement your solution, then click "Run Code" and "Submit Code".
+                  <div className="text-center p-4 bg-slate-50 border border-dashed border-indigo-150 rounded-lg">
+                    <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                      Use the code sandbox on the right to implement your solution, then click "Run & Verify Code".
                     </p>
                   </div>
                 )}
@@ -1985,46 +2125,37 @@ export default function LessonWorkspace() {
         </div>
 
         {/* ================= RIGHT COLUMN: INTERACTIVE CODE SANDBOX ================= */}
-        <div className="w-full lg:w-1/2 flex flex-col bg-slate-950 overflow-hidden">
+        <div className="w-full lg:w-1/2 flex flex-col bg-slate-950 overflow-hidden border-l border-slate-800">
           
           {/* Editor Header Bar */}
-          <div className="glass-panel flex items-center justify-between px-6 py-3 border-b border-white/5 bg-slate-900/40 shrink-0">
+          <div className="flex items-center justify-between px-6 py-3 border-b border-slate-800 bg-slate-900 text-slate-200 shrink-0 select-none">
             <div className="flex items-center gap-2">
-              <ConsoleIcon className="h-4.5 w-4.5 text-blue-400" />
-              <span className="text-xs font-extrabold text-slate-300 tracking-wide uppercase">Interactive Editor</span>
+              <ConsoleIcon className="h-4.5 w-4.5 text-indigo-400" />
+              <span className="text-xs font-bold text-slate-200 tracking-wide uppercase">Workspace Editor</span>
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="text-3xs font-extrabold text-slate-500 bg-slate-900 border border-white/10 px-2.5 py-1 rounded">
-                {activeLessonData.task.language.toUpperCase()}
+              <span className="text-3xs font-extrabold text-indigo-400 bg-indigo-950/40 border border-indigo-800/40 px-2.5 py-1 rounded tracking-wider uppercase">
+                {activeLessonData.task.language}
               </span>
 
-              {/* Run Code Button */}
+              {/* Unified Run & Verify Code Button */}
               <button
-                onClick={handleRunCode}
-                disabled={isRunning || isSubmitting}
-                className="flex items-center gap-1.5 rounded bg-slate-900 hover:bg-slate-800 text-2xs font-extrabold px-3 py-1.5 border border-white/10 transition-all text-slate-200 hover:text-white cursor-pointer"
+                onClick={handleRunAndVerifyCode}
+                disabled={isRunning}
+                className="relative flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-2xs font-extrabold px-4 py-2 text-white transition-all duration-300 shadow-md shadow-indigo-600/20 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
               >
                 {isRunning ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Compiling...</span>
+                  </>
                 ) : (
-                  <Play className="h-3 w-3 fill-slate-300" />
+                  <>
+                    <Play className="h-3 w-3 fill-white text-white" />
+                    <span>Run & Verify Code</span>
+                  </>
                 )}
-                Run Code
-              </button>
-
-              {/* Submit Code Button */}
-              <button
-                onClick={handleSubmitCode}
-                disabled={isRunning || isSubmitting}
-                className="flex items-center gap-1.5 rounded bg-blue-600 hover:bg-blue-500 text-2xs font-extrabold px-3.5 py-1.5 text-white transition-all hover:scale-103 shadow shadow-blue-500/10 cursor-pointer"
-              >
-                {isSubmitting ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <ShieldCheck className="h-3 w-3" />
-                )}
-                Submit Code
               </button>
             </div>
           </div>
@@ -2039,7 +2170,7 @@ export default function LessonWorkspace() {
               theme="vs-dark"
               options={{
                 fontSize: 13,
-                fontFamily: "Fira Code, Menlo, Monaco, Consolas, monospace",
+                fontFamily: "var(--font-mono)",
                 minimap: { enabled: false },
                 lineNumbers: "on",
                 roundedSelection: true,
@@ -2056,26 +2187,28 @@ export default function LessonWorkspace() {
           </div>
 
           {/* Console / Output Tabs Console */}
-          <div className="h-56 border-t border-white/5 bg-black flex flex-col shrink-0">
-            <div className="bg-slate-950 px-4 py-2 border-b border-white/5 flex items-center justify-between text-2xs text-slate-500 font-bold select-none uppercase tracking-widest">
+          <div className="h-56 border-t border-slate-800 bg-slate-950 flex flex-col shrink-0">
+            <div className="bg-slate-900 px-4 py-2 border-b border-slate-800/80 flex items-center justify-between text-2xs text-slate-400 font-bold select-none uppercase tracking-widest">
               <div className="flex gap-4">
                 <button 
                   onClick={() => setConsoleTab("logs")}
-                  className={`transition-colors flex items-center gap-1 cursor-pointer ${
-                    consoleTab === "logs" ? "text-blue-400 font-extrabold" : "text-slate-500 hover:text-slate-300"
+                  className={`transition-colors flex items-center gap-1.5 cursor-pointer py-1 px-2 rounded ${
+                    consoleTab === "logs" ? "text-indigo-400 bg-slate-850 font-extrabold border border-indigo-500/20" : "text-slate-500 hover:text-slate-300"
                   }`}
                 >
-                  Compiler Output Logs
+                  <ConsoleIcon className="h-3.5 w-3.5" />
+                  Compiler Logs
                 </button>
                 
                 {(activeLessonData.task.language === "html" || activeLessonData.task.language === "css") && (
                   <button 
                     onClick={() => setConsoleTab("preview")}
-                    className={`transition-colors flex items-center gap-1 cursor-pointer ${
-                      consoleTab === "preview" ? "text-blue-400 font-extrabold" : "text-slate-500 hover:text-slate-300"
+                    className={`transition-colors flex items-center gap-1.5 cursor-pointer py-1 px-2 rounded ${
+                      consoleTab === "preview" ? "text-indigo-400 bg-slate-850 font-extrabold border border-indigo-500/20" : "text-slate-500 hover:text-slate-300"
                     }`}
                   >
-                    Visual Output Preview
+                    <Play className="h-3.5 w-3.5 fill-indigo-400 text-indigo-400" />
+                    Output Preview
                   </button>
                 )}
               </div>
@@ -2084,32 +2217,32 @@ export default function LessonWorkspace() {
                 onClick={() => {
                   if (consoleTab === "logs") setConsoleLogs([]);
                 }}
-                className="hover:text-slate-200 flex items-center gap-1 transition-colors"
+                className="hover:text-slate-200 text-slate-500 flex items-center gap-1 transition-colors py-1 px-2 rounded hover:bg-slate-850"
               >
                 <RotateCcw className="h-3 w-3" /> Clear
               </button>
             </div>
             
-            <div className="flex-1 overflow-hidden relative bg-black">
+            <div className="flex-1 overflow-hidden relative bg-slate-950">
               {consoleTab === "logs" ? (
-                <div className="h-full p-3.5 font-mono text-2xs overflow-y-auto space-y-1 text-indigo-400 select-text">
+                <div className="h-full p-4 font-mono text-2xs overflow-y-auto space-y-1.5 text-slate-300 select-text">
                   {consoleLogs.length === 0 ? (
-                    <span className="text-slate-700 font-semibold italic">Console idle. Click "Run Code" or "Submit Code" to check results.</span>
+                    <span className="text-slate-500 font-semibold italic">Console idle. Click "Run & Verify Code" to check results.</span>
                   ) : (
                     consoleLogs.map((log, i) => {
-                      let logClass = "text-slate-300";
+                      let logClass = "text-slate-400";
                       if (log.startsWith("Error") || log.includes("FAILED") || log.includes("Runtime error") || log.includes("failed")) {
-                        logClass = "text-rose-400 font-semibold";
+                        logClass = "text-rose-400 font-semibold bg-rose-950/20 px-2.5 py-1 rounded border border-rose-900/30";
                       } else if (log.startsWith("Assert") && log.includes("PASSED")) {
-                        logClass = "text-indigo-400 font-medium";
+                        logClass = "text-emerald-400 font-medium bg-emerald-950/20 px-2.5 py-1 rounded border border-emerald-900/30";
                       } else if (log.includes("STATUS: ALL") || log.includes("PASSED!")) {
-                        logClass = "text-emerald-400 font-bold";
+                        logClass = "text-emerald-300 font-bold bg-gradient-to-r from-emerald-600/20 to-teal-600/20 px-3.5 py-2 rounded-lg border border-emerald-500/30 shadow-lg shadow-emerald-500/5 animate-pulse mt-2 mb-2 block";
                       } else if (log.startsWith("Assert") || log.startsWith("Analyzing") || log.startsWith("Checking")) {
-                        logClass = "text-slate-500";
+                        logClass = "text-slate-400";
                       }
                       
                       return (
-                        <div key={i} className={logClass}>
+                        <div key={i} className={`${logClass} py-0.5`}>
                           {log}
                         </div>
                       );

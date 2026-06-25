@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useApp } from "../../lib/db";
 import { Course } from "../../data/coursesData";
 import { Search, Globe, Cpu, Terminal, Smartphone, Server, BookOpen, Clock, ChevronRight, Check, Sparkles } from "lucide-react";
@@ -9,9 +9,10 @@ import Link from "next/link";
 
 function CatalogContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const initialTrack = searchParams.get("track") || "all";
 
-  const { courses, tracks, user, enrollInCourse } = useApp();
+  const { courses, tracks, user, enrollInCourse, loading } = useApp();
   
   // States
   const [searchQuery, setSearchQuery] = useState("");
@@ -67,7 +68,7 @@ function CatalogContent() {
 
   // Check enrollment status
   const isEnrolled = (courseId: string) => {
-    return user?.enrolledCourses.includes(courseId) || false;
+    return user?.enrolledCourses?.includes(courseId) || false;
   };
 
   return (
@@ -232,7 +233,9 @@ function CatalogContent() {
                     <ChevronRight className="h-3.5 w-3.5" />
                   </Link>
 
-                  {enrolled ? (
+                  {loading ? (
+                    <div className="h-8 w-24 bg-indigo-50/50 border border-indigo-100/30 animate-pulse rounded-xl" />
+                  ) : enrolled ? (
                     <Link
                       href="/dashboard"
                       className="inline-flex items-center gap-1 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200/50 px-3.5 py-2 text-xs font-bold hover:bg-emerald-100 transition-all"
@@ -242,7 +245,21 @@ function CatalogContent() {
                     </Link>
                   ) : (
                     <button
-                      onClick={() => enrollInCourse(course.id)}
+                      onClick={async () => {
+                        if (!user) {
+                          router.push("/signin");
+                        } else {
+                          await enrollInCourse(course.id);
+                          const totalLessons = course.modules.flatMap(m => m.lessons);
+                          const nextLesson = totalLessons.find(l => !user?.completedLessons?.includes(l.id));
+                          const targetId = nextLesson ? nextLesson.id : totalLessons[0]?.id;
+                          if (targetId) {
+                            router.push(`/courses/${course.id}/lessons/${targetId}`);
+                          } else {
+                            router.push(`/courses/${course.id}`);
+                          }
+                        }
+                      }}
                       className="rounded-xl btn-gradient px-4 py-2 text-xs shadow-md shadow-indigo-500/15 hover:scale-103"
                     >
                       Quick Enroll

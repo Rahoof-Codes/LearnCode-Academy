@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useApp, getLevelInfo } from "../lib/db";
@@ -7,7 +8,12 @@ import { Terminal, Flame, User, Cpu, Zap, LogOut, Sparkles } from "lucide-react"
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { user, role, setRole, isFirebaseActive, logout } = useApp();
+  const { user, role, setRole, logout, loading } = useApp();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const navLinks = [
     { name: "Catalog", href: "/catalog" },
@@ -15,8 +21,8 @@ export default function Navbar() {
     { name: "Profile", href: "/profile" },
   ];
 
-  const isAdmin = role === "admin";
-  const levelInfo = user ? getLevelInfo(user.xp) : { level: 1, progressPercentage: 0 };
+  const isAdmin = mounted && !loading && role === "admin";
+  const levelInfo = mounted && !loading && user ? getLevelInfo(user.xp) : { level: 1, progressPercentage: 0 };
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl border-b border-indigo-100/60 px-4 py-2.5 md:px-8 shadow-sm shadow-indigo-500/5">
@@ -68,7 +74,7 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           
           {/* Streak + Level (desktop) */}
-          {user && (
+          {mounted && !loading && user && (
             <div className="hidden items-center gap-3 sm:flex">
               <div className="flex items-center gap-1.5 text-xs font-bold text-amber-500">
                 <Flame className="h-3.5 w-3.5 fill-amber-500" />
@@ -90,45 +96,12 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* Connection status */}
-          <div 
-            title={isFirebaseActive ? "Firebase connected" : "Demo mode — local storage"}
-            className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider select-none border ${
-              isFirebaseActive 
-                ? "bg-emerald-50 text-emerald-600 border-emerald-200" 
-                : "bg-amber-50 text-amber-600 border-amber-200"
-            }`}
-          >
-            <span className={`h-1.5 w-1.5 rounded-full ${isFirebaseActive ? "bg-emerald-500" : "bg-amber-500"}`} />
-            {isFirebaseActive ? "Live" : "Demo"}
-          </div>
 
-          {/* Role switch */}
-          <div className="flex items-center rounded-xl bg-slate-50 p-0.5 border border-indigo-100/60">
-            <button
-              onClick={() => setRole("student")}
-              className={`rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition-all ${
-                role === "student"
-                  ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-sm"
-                  : "text-slate-400 hover:text-indigo-500"
-              }`}
-            >
-              Student
-            </button>
-            <button
-              onClick={() => setRole("admin")}
-              className={`rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition-all ${
-                role === "admin"
-                  ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm"
-                  : "text-slate-400 hover:text-amber-500"
-              }`}
-            >
-              Admin
-            </button>
-          </div>
 
           {/* Avatar / Actions */}
-          {user ? (
+          {!mounted || loading ? (
+            <div className="h-8 w-8 rounded-full bg-indigo-50 border border-indigo-100/50 animate-pulse" />
+          ) : user ? (
             <div className="flex items-center gap-2">
               <Link 
                 href="/profile" 

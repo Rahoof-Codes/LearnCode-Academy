@@ -6,13 +6,18 @@ import { useEffect, useState } from "react";
 import { Terminal, Shield, Sparkles, AlertTriangle, User, Lock, Mail, Eye, EyeOff } from "lucide-react";
 
 export default function SignIn() {
-  const { user, isFirebaseActive, signInWithGoogle, signInWithEmail, signUpWithEmail } = useApp();
+  const { user, signInWithGoogle, signInWithEmail, signUpWithEmail } = useApp();
   const router = useRouter();
   
-  const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin");
+  const [mounted, setMounted] = useState(false);
+  const [activeTab, setActiveTab] = useState<"signin" | "signup" | "admin">("signin");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Form states
   const [name, setName] = useState("");
@@ -65,6 +70,9 @@ export default function SignIn() {
       if (activeTab === "signin") {
         await signInWithEmail(email.trim(), password);
         router.push("/dashboard");
+      } else if (activeTab === "admin") {
+        await signInWithEmail(email.trim(), password, true);
+        router.push("/admin");
       } else {
         if (!name.trim()) {
           setError("Please enter your name.");
@@ -84,7 +92,22 @@ export default function SignIn() {
       }
     } catch (err: any) {
       console.error("Auth action failed:", err);
-      setError(err?.message || "Authentication action failed. Please check your credentials.");
+      const errMsg = err?.message || "";
+      if (
+        errMsg.includes("user-not-found") || 
+        errMsg.includes("Account not found") || 
+        err?.code === "auth/user-not-found"
+      ) {
+        setError("Account not found. Please create an account first.");
+        setActiveTab("signup");
+      } else if (
+        errMsg.includes("invalid-credential") || 
+        err?.code === "auth/invalid-credential"
+      ) {
+        setError("Invalid email or password. If you don't have an account, please register first.");
+      } else {
+        setError(errMsg.replace("Firebase: ", "") || "Authentication action failed. Please check your credentials.");
+      }
     } finally {
       setLoading(false);
     }
@@ -128,45 +151,38 @@ export default function SignIn() {
         </div>
 
         {/* Tab Selection */}
-        <div className="grid grid-cols-2 gap-1 bg-slate-100/80 p-1 rounded-xl border border-indigo-100/50 mb-6">
-          <button
-            type="button"
-            onClick={() => setActiveTab("signin")}
-            className={`py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-              activeTab === "signin"
-                ? "bg-white text-indigo-600 shadow-md border border-indigo-100/50"
-                : "text-slate-400 hover:text-slate-600"
-            }`}
-          >
-            Sign In
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("signup")}
-            className={`py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-              activeTab === "signup"
-                ? "bg-white text-indigo-600 shadow-md border border-indigo-100/50"
-                : "text-slate-400 hover:text-slate-600"
-            }`}
-          >
-            Create Account
-          </button>
-        </div>
-
-        {/* Firebase Config Warnings if in Demo Mode */}
-        {!isFirebaseActive && (
-          <div className="mb-5 rounded-xl border border-amber-200/60 bg-amber-50/80 p-3.5 space-y-2">
-            <div className="flex items-start gap-2.5">
-              <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-              <div className="space-y-0.5">
-                <span className="text-[11px] font-bold text-amber-600">Demo Mode Active</span>
-                <p className="text-[10px] leading-relaxed text-slate-500">
-                  Running locally without live Firebase connection. Accounts registered will be saved in your simulated session.
-                </p>
-              </div>
-            </div>
+        {activeTab !== "admin" ? (
+          <div className="grid grid-cols-2 gap-1 bg-slate-100/80 p-1 rounded-xl border border-indigo-100/50 mb-6">
+            <button
+              type="button"
+              onClick={() => setActiveTab("signin")}
+              className={`py-2.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                activeTab === "signin"
+                  ? "bg-white text-indigo-600 shadow-md border border-indigo-100/50"
+                  : "text-slate-400 hover:text-slate-600"
+              }`}
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("signup")}
+              className={`py-2.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                activeTab === "signup"
+                  ? "bg-white text-indigo-600 shadow-md border border-indigo-100/50"
+                  : "text-slate-400 hover:text-slate-600"
+              }`}
+            >
+              Register
+            </button>
+          </div>
+        ) : (
+          <div className="mb-6 text-center">
+            <h3 className="text-xl font-bold text-amber-600">Admin Portal</h3>
+            <p className="text-xs text-slate-500 mt-1">Sign in to manage courses and users.</p>
           </div>
         )}
+
 
         {/* Error notification */}
         {error && (
@@ -260,51 +276,68 @@ export default function SignIn() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full btn-gradient flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-xs shadow-lg shadow-indigo-500/20 disabled:opacity-50 mt-2 cursor-pointer"
+            className={`w-full flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-xs shadow-lg disabled:opacity-50 mt-2 cursor-pointer transition-all ${
+              activeTab === "admin"
+                ? "bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-amber-500/20 hover:scale-[1.01] active:scale-[0.99]"
+                : "btn-gradient shadow-indigo-500/20"
+            }`}
           >
             {loading ? (
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
             ) : activeTab === "signin" ? (
               "Sign In with Email"
+            ) : activeTab === "admin" ? (
+              "Sign In as Administrator"
             ) : (
               "Register & Continue"
             )}
           </button>
         </form>
 
-        {/* Separator / Social Header */}
-        <div className="relative flex py-5 items-center">
-          <div className="flex-grow border-t border-indigo-100/60"></div>
-          <span className="flex-shrink mx-4 text-slate-300 text-[10px] font-bold uppercase tracking-widest">or</span>
-          <div className="flex-grow border-t border-indigo-100/60"></div>
-        </div>
+        {/* Separator & Social Auth - only show for student login/registration */}
+        {activeTab !== "admin" && (
+          <>
+            {/* Separator / Social Header */}
+            <div className="relative flex py-5 items-center">
+              <div className="flex-grow border-t border-indigo-100/60"></div>
+              <span className="flex-shrink mx-4 text-slate-300 text-[10px] font-bold uppercase tracking-widest">or</span>
+              <div className="flex-grow border-t border-indigo-100/60"></div>
+            </div>
 
-        {/* Social Authentication button */}
-        <div className="space-y-4">
-          <button
-            onClick={handleGoogleSignIn}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2.5 rounded-xl bg-white hover:bg-slate-50 border-2 border-slate-200/80 disabled:opacity-50 px-6 py-3.5 text-xs font-bold text-slate-700 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer shadow-sm"
-          >
-            {loading ? (
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
-            ) : (
-              <>
-                <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05" />
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-                </svg>
-                {isFirebaseActive ? "Continue with Google" : "Launch Demo Session"}
-              </>
-            )}
-          </button>
-          
-          <div className="flex items-center justify-center gap-2 text-[10px] font-semibold text-slate-300 select-none pt-4 border-t border-indigo-100/40">
-            <Shield className="h-3.5 w-3.5 text-emerald-500" />
-            <span>Secure SSL authentication &bull; GDPR Compliant</span>
-          </div>
+            {/* Social Authentication button */}
+            <div className="space-y-4">
+              <button
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2.5 rounded-xl bg-white hover:bg-slate-50 border-2 border-slate-200/80 disabled:opacity-50 px-6 py-3.5 text-xs font-bold text-slate-700 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer shadow-sm"
+              >
+                {loading ? (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+                ) : (
+                  <>
+                    <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05" />
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                    </svg>
+                    Continue with Google
+                  </>
+                )}
+              </button>
+            </div>
+          </>
+        )}
+        
+        <div className="flex items-center justify-center gap-2 text-[10px] font-semibold text-slate-300 select-none pt-4 border-t border-indigo-100/40 mt-4 flex-wrap">
+          <Shield className="h-3.5 w-3.5 text-emerald-500" />
+          <span>Secure SSL &bull; GDPR Compliant</span>
+          <span className="text-slate-200 hidden sm:inline">&bull;</span>
+          {activeTab === "admin" ? (
+            <button type="button" onClick={() => setActiveTab("signin")} className="text-indigo-400 hover:text-indigo-500 transition-colors font-bold cursor-pointer">Student Login</button>
+          ) : (
+            <button type="button" onClick={() => setActiveTab("admin")} className="text-amber-500 hover:text-amber-600 transition-colors font-bold cursor-pointer">Admin Login</button>
+          )}
         </div>
       </div>
     </div>

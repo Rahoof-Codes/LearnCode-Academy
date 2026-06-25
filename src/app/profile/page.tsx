@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 export default function Profile() {
-  const { user, courses, updateProfileName, updateProfilePhoto, isFirebaseActive, saveProfile, resetProgress, loading } = useApp();
+  const { user, courses, updateProfileName, updateProfilePhoto, saveProfile, resetProgress, loading } = useApp();
   
   // Profile name update states
   const [editing, setEditing] = useState(false);
@@ -34,39 +34,34 @@ export default function Profile() {
     setFetchingFiles(true);
     setUploadError(null);
     try {
-      if (isFirebaseActive) {
-        const { ref, listAll, getDownloadURL, getMetadata } = await import("firebase/storage");
-        const { storage } = await import("../../lib/firebase");
-        if (storage) {
-          const userFolderRef = ref(storage, `users/${user.uid}/files`);
-          const res = await listAll(userFolderRef);
-          
-          const filesData = await Promise.all(
-            res.items.map(async (itemRef) => {
-              const [url, metadata] = await Promise.all([
-                getDownloadURL(itemRef),
-                getMetadata(itemRef)
-              ]);
-              return {
-                name: itemRef.name,
-                fullPath: itemRef.fullPath,
-                size: metadata.size,
-                contentType: metadata.contentType || "application/octet-stream",
-                timeCreated: metadata.timeCreated,
-                downloadURL: url
-              };
-            })
-          );
-          filesData.sort((a, b) => new Date(b.timeCreated).getTime() - new Date(a.timeCreated).getTime());
-          setStorageFiles(filesData);
-        }
-      } else {
-        const mockStorageStr = localStorage.getItem(`learncode_simulated_storage_${user.uid}`);
-        const mockFiles = mockStorageStr ? JSON.parse(mockStorageStr) : [];
-        setStorageFiles(mockFiles);
+      const { ref, listAll, getDownloadURL, getMetadata } = await import("firebase/storage");
+      const { storage } = await import("../../lib/firebase");
+      if (storage) {
+        const userFolderRef = ref(storage, `users/${user.uid}/files`);
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Storage timeout")), 1500));
+        const res: any = await Promise.race([listAll(userFolderRef), timeoutPromise]);
+        
+        const filesData = await Promise.all(
+          res.items.map(async (itemRef) => {
+            const [url, metadata] = await Promise.all([
+              getDownloadURL(itemRef),
+              getMetadata(itemRef)
+            ]);
+            return {
+              name: itemRef.name,
+              fullPath: itemRef.fullPath,
+              size: metadata.size,
+              contentType: metadata.contentType || "application/octet-stream",
+              timeCreated: metadata.timeCreated,
+              downloadURL: url
+            };
+          })
+        );
+        filesData.sort((a, b) => new Date(b.timeCreated).getTime() - new Date(a.timeCreated).getTime());
+        setStorageFiles(filesData);
       }
     } catch (err) {
-      console.error("Failed to fetch storage files:", err);
+      // Silently fail if storage is unconfigured or times out to avoid console spam
     } finally {
       setFetchingFiles(false);
     }
@@ -76,7 +71,7 @@ export default function Profile() {
     if (user) {
       fetchStorageFiles();
     }
-  }, [user?.uid, isFirebaseActive]);
+  }, [user?.uid]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!user) return;
@@ -91,40 +86,14 @@ export default function Profile() {
     setUploadingFile(true);
     setUploadError(null);
     try {
-      if (isFirebaseActive) {
-        const { ref, uploadBytes } = await import("firebase/storage");
-        const { storage } = await import("../../lib/firebase");
-        if (storage) {
-          const fileRef = ref(storage, `users/${user.uid}/files/${file.name}`);
-          await uploadBytes(fileRef, file);
-          await fetchStorageFiles();
-        } else {
-          throw new Error("Storage not configured.");
-        }
+      const { ref, uploadBytes } = await import("firebase/storage");
+      const { storage } = await import("../../lib/firebase");
+      if (storage) {
+        const fileRef = ref(storage, `users/${user.uid}/files/${file.name}`);
+        await uploadBytes(fileRef, file);
+        await fetchStorageFiles();
       } else {
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-          const base64String = event.target?.result as string;
-          const mockStorageStr = localStorage.getItem(`learncode_simulated_storage_${user.uid}`);
-          const mockFiles = mockStorageStr ? JSON.parse(mockStorageStr) : [];
-          
-          const filtered = mockFiles.filter((f: any) => f.name !== file.name);
-          const newFile = {
-            name: file.name,
-            fullPath: `users/${user.uid}/files/${file.name}`,
-            size: file.size,
-            contentType: file.type || "application/octet-stream",
-            timeCreated: new Date().toISOString(),
-            downloadURL: base64String
-          };
-          
-          localStorage.setItem(
-            `learncode_simulated_storage_${user.uid}`, 
-            JSON.stringify([newFile, ...filtered])
-          );
-          await fetchStorageFiles();
-        };
-        reader.readAsDataURL(file);
+        throw new Error("Storage not configured.");
       }
     } catch (err: any) {
       console.error("Upload failed:", err);
@@ -138,19 +107,11 @@ export default function Profile() {
     if (!user) return;
     if (!confirm(`Are you sure you want to delete "${fileToDelete.name}"?`)) return;
     try {
-      if (isFirebaseActive) {
-        const { ref, deleteObject } = await import("firebase/storage");
-        const { storage } = await import("../../lib/firebase");
-        if (storage) {
-          const fileRef = ref(storage, fileToDelete.fullPath);
-          await deleteObject(fileRef);
-          await fetchStorageFiles();
-        }
-      } else {
-        const mockStorageStr = localStorage.getItem(`learncode_simulated_storage_${user.uid}`);
-        const mockFiles = mockStorageStr ? JSON.parse(mockStorageStr) : [];
-        const filtered = mockFiles.filter((f: any) => f.name !== fileToDelete.name);
-        localStorage.setItem(`learncode_simulated_storage_${user.uid}`, JSON.stringify(filtered));
+      const { ref, deleteObject } = await import("firebase/storage");
+      const { storage } = await import("../../lib/firebase");
+      if (storage) {
+        const fileRef = ref(storage, fileToDelete.fullPath);
+        await deleteObject(fileRef);
         await fetchStorageFiles();
       }
     } catch (err: any) {
@@ -183,24 +144,15 @@ export default function Profile() {
 
     setUploadingPhoto(true);
     try {
-      if (isFirebaseActive) {
-        const { ref, uploadBytes, getDownloadURL } = await import("firebase/storage");
-        const { storage } = await import("../../lib/firebase");
-        if (storage) {
-          const storageRef = ref(storage, `avatars/${user?.uid}`);
-          await uploadBytes(storageRef, file);
-          const downloadURL = await getDownloadURL(storageRef);
-          await updateProfilePhoto(downloadURL);
-        } else {
-          throw new Error("Firebase storage is not configured.");
-        }
+      const { ref, uploadBytes, getDownloadURL } = await import("firebase/storage");
+      const { storage } = await import("../../lib/firebase");
+      if (storage) {
+        const storageRef = ref(storage, `avatars/${user?.uid}`);
+        await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(storageRef);
+        await updateProfilePhoto(downloadURL);
       } else {
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-          const base64String = event.target?.result as string;
-          await updateProfilePhoto(base64String);
-        };
-        reader.readAsDataURL(file);
+        throw new Error("Firebase storage is not configured.");
       }
     } catch (err) {
       console.error("Failed to upload image:", err);
@@ -530,26 +482,6 @@ export default function Profile() {
         </h3>
 
         <div className="grid gap-6 md:grid-cols-3 text-left">
-          {/* Engine Status */}
-          <div className="bg-white/60 p-4 rounded-xl border border-indigo-100/50 space-y-3 flex flex-col justify-between">
-            <div className="space-y-1">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Storage Engine</span>
-              <p className="text-2xs text-slate-400 leading-relaxed">
-                Your learning progress is saved in this environment's active data store.
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-2 pt-2">
-              <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-4xs font-bold uppercase tracking-wider ${
-                isFirebaseActive 
-                  ? "bg-emerald-50 text-emerald-600 border border-emerald-200/50" 
-                  : "bg-amber-50 text-amber-600 border border-amber-200/50"
-              }`}>
-                <span className={`h-1.5 w-1.5 rounded-full ${isFirebaseActive ? "bg-emerald-500" : "bg-amber-500"}`} />
-                {isFirebaseActive ? "Firebase Live" : "Demo Mode"}
-              </span>
-            </div>
-          </div>
 
           {/* Export/Import Backup */}
           <div className="bg-white/60 p-4 rounded-xl border border-indigo-100/50 space-y-4 flex flex-col justify-between">

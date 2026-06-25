@@ -1,27 +1,32 @@
 "use client";
 import { useState, useEffect, createContext, useContext } from "react";
 import { isFirebaseConfigured, auth, db } from "./firebase";
-import { 
-  onAuthStateChanged, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signOut, 
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
   updateProfile as fbUpdateProfile
 } from "firebase/auth";
-import { 
-  doc, 
-  getDoc, 
-  setDoc, 
-  updateDoc, 
-  arrayUnion, 
-  collection, 
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  arrayUnion,
+  collection,
   getDocs,
   query,
   where
 } from "firebase/firestore";
 import { defaultCourses, Course, Track, tracks } from "../data/coursesData";
 
+export const ADMIN_EMAILS = [
+  "abdulrahoof@lac.com",
+];
+
 // Achievement Definitions
+
 export interface Achievement {
   id: string;
   title: string;
@@ -81,7 +86,7 @@ interface AppContextType {
   updateProfileName: (newName: string) => Promise<void>;
   updateProfilePhoto: (photoURL: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
-  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signInWithEmail: (email: string, password: string, asAdmin?: boolean) => Promise<void>;
   signUpWithEmail: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   saveProfile: (updatedProfile: UserProfile) => Promise<void>;
@@ -141,19 +146,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (fbUser) {
           try {
             const userDocRef = doc(db, "users", fbUser.uid);
-            const userDoc = await getDoc(userDocRef);
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore timeout")), 1000));
+            const userDoc: any = await Promise.race([getDoc(userDocRef), timeoutPromise]);
             
-            if (userDoc.exists()) {
+            if (userDoc && userDoc.exists()) {
               const profile = userDoc.data() as UserProfile;
-              setUser(profile);
-              setRoleState(profile.role || "student");
+              const isWhitelistedAdmin = ADMIN_EMAILS.includes(profile.email.toLowerCase());
+              const finalRole = isWhitelistedAdmin ? "admin" : "student";
+              setUser({ ...profile, role: finalRole });
+              setRoleState(finalRole);
             } else {
-              // Create user record in Firestore
+              throw new Error("Profile not found in Firestore");
+            }
+          } catch (err: any) {
+            const cachedStr = localStorage.getItem(`learncode_profile_${fbUser.uid}`);
+            if (cachedStr) {
+              const cachedProfile = JSON.parse(cachedStr);
+              setUser(cachedProfile);
+              setRoleState(cachedProfile.role);
+            } else {
+              const isWhitelistedAdmin = ADMIN_EMAILS.includes(fbUser.email?.toLowerCase() || "");
+              const finalRole = isWhitelistedAdmin ? "admin" : "student";
               const newProfile: UserProfile = {
                 uid: fbUser.uid,
                 name: fbUser.displayName || "New Student",
                 email: fbUser.email || "",
-                role: "student",
+                role: finalRole,
                 xp: 0,
                 level: 1,
                 streak: 1,
@@ -165,14 +183,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 certificates: [],
                 photoURL: fbUser.photoURL || undefined,
               };
-              await setDoc(userDocRef, newProfile);
               setUser(newProfile);
-              setRoleState("student");
+              setRoleState(finalRole);
+              localStorage.setItem(`learncode_profile_${fbUser.uid}`, JSON.stringify(newProfile));
+              try {
+                const userDocRef = doc(db, "users", fbUser.uid);
+                setDoc(userDocRef, newProfile).catch(() => {});
+              } catch(e) {}
             }
-          } catch (err) {
-            console.error("Error fetching user profile from Firestore:", err);
-            // Fallback to local storage on Firestore error
-            loadLocalStorageFallback();
           }
         } else {
           setUser(null);
@@ -191,8 +209,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             const defaultFiltered = defaultCourses.filter(c => !customCoursesList.some(cc => cc.id === c.id));
             setCourses([...defaultFiltered, ...customCoursesList]);
           }
-        } catch (err) {
-          console.error("Error fetching custom courses from Firestore:", err);
+        } catch (err: any) {
+          if (err?.message?.includes("client is offline") || err?.code === "unavailable") {
+            console.warn("Firestore is offline, custom courses could not be fetched.");
+          } else {
+            console.error("Error fetching custom courses from Firestore:", err);
+          }
         }
       };
       fetchCustomCourses();
@@ -205,14 +227,38 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const loadLocalStorageFallback = () => {
+  const loadLocalStorageFallback = (fbUser?: any) => {
     const savedProfile = localStorage.getItem("learncode_profile");
     const savedCourses = localStorage.getItem("learncode_courses");
 
     if (savedProfile) {
       const parsed = JSON.parse(savedProfile);
-      setUser(parsed);
-      setRoleState(parsed.role || "student");
+      const isWhitelistedAdmin = ADMIN_EMAILS.includes(parsed.email.toLowerCase());
+      const finalRole = isWhitelistedAdmin ? "admin" : "student";
+      const updatedProfile = { ...parsed, role: finalRole };
+      setUser(updatedProfile);
+      setRoleState(finalRole);
+    } else if (fbUser) {
+      const isWhitelistedAdmin = ADMIN_EMAILS.includes(fbUser.email?.toLowerCase() || "");
+      const finalRole = isWhitelistedAdmin ? "admin" : "student";
+      const fallbackProfile: UserProfile = {
+        uid: fbUser.uid,
+        name: fbUser.displayName || "New Student",
+        email: fbUser.email || "",
+        role: finalRole,
+        xp: 0,
+        level: 1,
+        streak: 1,
+        lastActiveDate: new Date().toISOString().split("T")[0],
+        enrolledCourses: [],
+        completedLessons: [],
+        completedQuizzes: {},
+        achievements: [],
+        certificates: [],
+        photoURL: fbUser.photoURL || undefined,
+      };
+      setUser(fallbackProfile);
+      setRoleState(finalRole);
     } else {
       setUser(null);
     }
@@ -227,15 +273,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Sync profile edits to persistence
   const saveProfile = async (updatedProfile: UserProfile) => {
     setUser(updatedProfile);
+    localStorage.setItem(`learncode_profile_${updatedProfile.uid}`, JSON.stringify(updatedProfile));
+    
     if (isFirebaseConfigured && db && auth?.currentUser) {
       try {
         const userDocRef = doc(db, "users", auth.currentUser.uid);
         await setDoc(userDocRef, updatedProfile, { merge: true });
       } catch (err) {
-        console.error("Failed to sync profile to Firestore:", err);
+        // Silent fallback
       }
-    } else {
-      localStorage.setItem("learncode_profile", JSON.stringify(updatedProfile));
     }
   };
 
@@ -288,7 +334,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         // Double check all lessons are done
         const allLessonIds = course.modules.flatMap(m => m.lessons.map(l => l.id));
         const isAllLessonsDone = allLessonIds.every(id => profile.completedLessons.includes(id));
-        
+
         if (isAllLessonsDone) {
           // Check if already has certificate, if not issue one
           const alreadyHasCert = profile.certificates.some(c => c.courseId === courseId);
@@ -317,13 +363,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     tracks.forEach(track => {
       const trackCourses = courses.filter(c => c.trackId === track.id);
       if (trackCourses.length > 0) {
-        const isAllCompleted = trackCourses.every(c => 
+        const isAllCompleted = trackCourses.every(c =>
           profile.certificates.some(cert => cert.courseId === c.id)
         );
         if (isAllCompleted && !newAchievements.includes(`track_complete_${track.id}`)) {
           newAchievements.push(`track_complete_${track.id}`);
           xpGained += 500; // Track completion custom reward
-          
+
           if (!newAchievements.includes("track_complete")) {
             newAchievements.push("track_complete");
             xpGained += achievementsList.find(a => a.id === "track_complete")?.xpReward || 0;
@@ -342,7 +388,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const completeLesson = async (courseId: string, lessonId: string) => {
     if (!user) return;
-    
+
     // Enroll if not already
     let enrolled = [...user.enrolledCourses];
     if (!enrolled.includes(courseId)) {
@@ -383,7 +429,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     // Check achievements
     checkAndAwardAchievements(updatedProfile, "lesson");
-    
+
     // Check if course is complete after this lesson
     if (course) {
       const allLessons = course.modules.flatMap(m => m.lessons.map(l => l.id));
@@ -424,7 +470,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     if (firstTimePassing) {
       checkAndAwardAchievements(updatedProfile, "quiz");
-      
+
       // Check if this completes the course
       const course = courses.find(c => c.id === courseId);
       if (course) {
@@ -487,7 +533,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       ...user,
       name: newName
     };
-    
+
     // Update real firebase auth name if configured
     if (isFirebaseConfigured && auth?.currentUser) {
       try {
@@ -496,7 +542,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         console.error("Failed to update auth display name:", err);
       }
     }
-    
+
     await saveProfile(updatedProfile);
   };
 
@@ -521,26 +567,92 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setRoleState("student");
     }
   };
-  
-  const signInWithEmail = async (email: string, password: string) => {
-    if (isFirebaseConfigured && auth) {
-      await signInWithEmailAndPassword(auth, email, password);
-    } else {
-      const simulatedUsersStr = localStorage.getItem("learncode_simulated_users");
-      const simulatedUsers = simulatedUsersStr ? JSON.parse(simulatedUsersStr) : {};
-      const emailLower = email.toLowerCase();
-      if (simulatedUsers[emailLower]) {
-        if (simulatedUsers[emailLower].password === password) {
-          const profile = simulatedUsers[emailLower].profile;
-          localStorage.setItem("learncode_profile", JSON.stringify(profile));
-          setUser(profile);
-          setRoleState(profile.role || "student");
+
+  const signInWithEmail = async (email: string, password: string, asAdmin: boolean = false) => {
+    if (isFirebaseConfigured && auth && db) {
+      let fbUser;
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        fbUser = userCredential.user;
+      } catch (err: any) {
+        if (email.toLowerCase() === "abdulrahoof@lac.com" && password === "RAHOOF#7" && (err?.code === "auth/user-not-found" || err?.code === "auth/invalid-credential" || err?.message?.includes("invalid-credential"))) {
+          // Auto-create specific admin account if it does not exist
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          fbUser = userCredential.user;
+          await fbUpdateProfile(fbUser, { displayName: "Abdul Rahoof" });
         } else {
-          throw new Error("Invalid password.");
+          throw err;
         }
-      } else {
-        throw new Error("Account not found. Please register in the 'Create Account' tab.");
       }
+      
+      try {
+        // Fetch user profile from Firestore to check role
+        const userDocRef = doc(db, "users", fbUser.uid);
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore timeout")), 1000));
+        const userDoc: any = await Promise.race([getDoc(userDocRef), timeoutPromise]);
+        
+        const isWhitelistedAdmin = ADMIN_EMAILS.includes(fbUser.email?.toLowerCase() || email.toLowerCase());
+        const finalRole = isWhitelistedAdmin ? "admin" : "student";
+
+        if (userDoc && userDoc.exists()) {
+          const profile = userDoc.data() as UserProfile;
+          if (asAdmin && finalRole !== "admin") {
+            await signOut(auth);
+            throw new Error("Access Denied: You do not have administrator privileges.");
+          }
+          const updatedProfile = { ...profile, role: finalRole };
+          setUser(updatedProfile);
+          setRoleState(finalRole);
+        } else {
+          throw new Error("Profile not found");
+        }
+      } catch (err) {
+        const cachedStr = localStorage.getItem(`learncode_profile_${fbUser.uid}`);
+        if (cachedStr) {
+          const cachedProfile = JSON.parse(cachedStr);
+          if (asAdmin && cachedProfile.role !== "admin") {
+            await signOut(auth);
+            throw new Error("Access Denied: You do not have administrator privileges.");
+          }
+          setUser(cachedProfile);
+          setRoleState(cachedProfile.role);
+        } else {
+          const isWhitelistedAdmin = ADMIN_EMAILS.includes(fbUser.email?.toLowerCase() || email.toLowerCase());
+          const finalRole = isWhitelistedAdmin ? "admin" : "student";
+          
+          if (asAdmin && finalRole !== "admin") {
+            await signOut(auth);
+            throw new Error("Access Denied: You do not have administrator privileges.");
+          }
+          
+          const newProfile: UserProfile = {
+            uid: fbUser.uid,
+            name: fbUser.displayName || "New Student",
+            email: fbUser.email || email,
+            role: finalRole,
+            xp: 0,
+            level: 1,
+            streak: 1,
+            lastActiveDate: new Date().toISOString().split("T")[0],
+            enrolledCourses: [],
+            completedLessons: [],
+            completedQuizzes: {},
+            achievements: [],
+            certificates: [],
+            photoURL: fbUser.photoURL || undefined,
+          };
+          setUser(newProfile);
+          setRoleState(finalRole);
+          localStorage.setItem(`learncode_profile_${fbUser.uid}`, JSON.stringify(newProfile));
+          
+          try {
+            const userDocRef = doc(db, "users", fbUser.uid);
+            setDoc(userDocRef, newProfile).catch(() => {});
+          } catch(e) {}
+        }
+      }
+    } else {
+      throw new Error("Firebase is not configured. Authentication is unavailable.");
     }
   };
 
@@ -548,16 +660,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (isFirebaseConfigured && auth && db) {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const fbUser = userCredential.user;
-      
+
       // Update display name
       await fbUpdateProfile(fbUser, { displayName: name });
-      
+
+      const isWhitelistedAdmin = ADMIN_EMAILS.includes(fbUser.email?.toLowerCase() || email.toLowerCase());
+      const finalRole = isWhitelistedAdmin ? "admin" : "student";
+
       // Write profile to Firestore immediately
       const newProfile: UserProfile = {
         uid: fbUser.uid,
         name: name,
         email: fbUser.email || email,
-        role: "student",
+        role: finalRole,
         xp: 0,
         level: 1,
         streak: 1,
@@ -568,44 +683,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         achievements: [],
         certificates: [],
       };
-      await setDoc(doc(db, "users", fbUser.uid), newProfile);
+      
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 1000));
+      await Promise.race([setDoc(doc(db, "users", fbUser.uid), newProfile), timeoutPromise]).catch(() => {});
       
       setUser(newProfile);
-      setRoleState("student");
+      setRoleState(finalRole);
     } else {
-      const simulatedUsersStr = localStorage.getItem("learncode_simulated_users");
-      const simulatedUsers = simulatedUsersStr ? JSON.parse(simulatedUsersStr) : {};
-      const emailLower = email.toLowerCase();
-      if (simulatedUsers[emailLower]) {
-        throw new Error("Account already exists with this email.");
-      }
-      
-      const mockUid = `mock-user-${Math.random().toString(36).substring(2, 10)}`;
-      const newProfile: UserProfile = {
-        uid: mockUid,
-        name: name,
-        email: email,
-        role: "student",
-        xp: 0,
-        level: 1,
-        streak: 1,
-        lastActiveDate: new Date().toISOString().split("T")[0],
-        enrolledCourses: [],
-        completedLessons: [],
-        completedQuizzes: {},
-        achievements: [],
-        certificates: [],
-      };
-      
-      simulatedUsers[emailLower] = {
-        password: password,
-        profile: newProfile
-      };
-      
-      localStorage.setItem("learncode_simulated_users", JSON.stringify(simulatedUsers));
-      localStorage.setItem("learncode_profile", JSON.stringify(newProfile));
-      setUser(newProfile);
-      setRoleState("student");
+      throw new Error("Firebase is not configured. Authentication is unavailable.");
     }
   };
 
