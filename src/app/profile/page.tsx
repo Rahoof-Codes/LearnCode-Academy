@@ -42,7 +42,7 @@ export default function Profile() {
         const res: any = await Promise.race([listAll(userFolderRef), timeoutPromise]);
         
         const filesData = await Promise.all(
-          res.items.map(async (itemRef) => {
+          res.items.map(async (itemRef: any) => {
             const [url, metadata] = await Promise.all([
               getDownloadURL(itemRef),
               getMetadata(itemRef)

@@ -592,7 +592,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const userDoc: any = await Promise.race([getDoc(userDocRef), timeoutPromise]);
         
         const isWhitelistedAdmin = ADMIN_EMAILS.includes(fbUser.email?.toLowerCase() || email.toLowerCase());
-        const finalRole = isWhitelistedAdmin ? "admin" : "student";
+        const finalRole = (isWhitelistedAdmin ? "admin" : "student") as "admin" | "student";
 
         if (userDoc && userDoc.exists()) {
           const profile = userDoc.data() as UserProfile;
@@ -618,7 +618,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           setRoleState(cachedProfile.role);
         } else {
           const isWhitelistedAdmin = ADMIN_EMAILS.includes(fbUser.email?.toLowerCase() || email.toLowerCase());
-          const finalRole = isWhitelistedAdmin ? "admin" : "student";
+          const finalRole = (isWhitelistedAdmin ? "admin" : "student") as "admin" | "student";
           
           if (asAdmin && finalRole !== "admin") {
             await signOut(auth);
