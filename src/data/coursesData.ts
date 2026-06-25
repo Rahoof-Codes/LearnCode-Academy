@@ -432,6 +432,54 @@ export const defaultCourses: Course[] = [
             )
           }
         ]
+      },
+      {
+        id: "css-advanced",
+        title: "Advanced CSS & Responsiveness",
+        lessons: [
+          {
+            id: "css-media-queries",
+            title: "Responsive Design & Media Queries",
+            duration: "25 mins",
+            xp: 130,
+            contentFile: "css-media-queries.md",
+            quiz: createQuickQuiz(
+              "Media Queries",
+              "Which at-rule is used to apply styles based on screen width?",
+              ["@media", "@screen", "@responsive", "@layout"],
+              0,
+              "@media allows you to apply CSS rules based on conditions like screen width or device type."
+            )
+          },
+          {
+            id: "css-variables",
+            title: "CSS Variables (Custom Properties)",
+            duration: "20 mins",
+            xp: 110,
+            contentFile: "css-variables.md",
+            quiz: createQuickQuiz(
+              "CSS Variables",
+              "How do you declare a CSS variable in the root pseudo-class?",
+              ["$color: blue;", "var(--color): blue;", "--color: blue;", "const color = 'blue';"],
+              2,
+              "CSS variables are declared using double hyphens, like --my-var: value;."
+            )
+          },
+          {
+            id: "css-animations",
+            title: "Transitions and Animations",
+            duration: "30 mins",
+            xp: 140,
+            contentFile: "css-animations.md",
+            quiz: createQuickQuiz(
+              "CSS Animations",
+              "Which rule is used to define keyframes for a CSS animation?",
+              ["@animate", "@keyframes", "@transition", "@sequence"],
+              1,
+              "@keyframes specifies the animation code by defining styles at various points during the animation sequence."
+            )
+          }
+        ]
       }
     ]
   },
@@ -453,42 +501,220 @@ export const defaultCourses: Course[] = [
     ],
     modules: [
       {
-        id: "js-fundamentals",
-        title: "ES6 fundamentals",
+        id: "js-mod-1",
+        title: "Module 1: Language Fundamentals",
         lessons: [
           {
-            id: "js-variables",
-            title: "Scope: let, const, and var",
-            duration: "25 mins",
+            id: "js-var-data",
+            title: "Variables (let, const) & Data Types",
+            duration: "30 mins",
             xp: 100,
-            contentFile: "js-variables.md",
-            quiz: createQuickQuiz(
-              "JS Variables",
-              "Which variable declarations are block-scoped?",
-              ["var only", "let and const", "const only", "let, const, and var"],
-              1,
-              "let and const are block-scoped declarations, whereas var is function-scoped."
-            )
+            contentFile: "js-var-data.md",
+            quiz: createQuickQuiz("Variables", "Which keyword is used to declare a block-scoped variable that can be reassigned?", ["var", "const", "let", "def"], 2, "let is block-scoped and can be reassigned.")
+          },
+          {
+            id: "js-operators-logic",
+            title: "Operators & Conditional Logic",
+            duration: "30 mins",
+            xp: 100,
+            contentFile: "js-operators-logic.md",
+            quiz: createQuickQuiz("Conditionals", "Which operator is used for strict equality?", ["=", "==", "===", "!=="], 2, "=== checks for both value and type equality.")
+          },
+          {
+            id: "js-loops-scope",
+            title: "Loops (for, while, for...of) & Scope",
+            duration: "35 mins",
+            xp: 120,
+            contentFile: "js-loops-scope.md",
+            quiz: createQuickQuiz("Scope", "Variables declared with var are scoped to:", ["The block", "The function", "The entire file always", "The loop"], 1, "var is function-scoped.")
           }
         ]
       },
       {
-        id: "js-async",
-        title: "Asynchronous Javascript",
+        id: "js-mod-2",
+        title: "Module 2: Functions & Objects",
         lessons: [
           {
-            id: "js-promises",
-            title: "Promises & Async/Await",
+            id: "js-func-declarations",
+            title: "Function Declarations vs Expressions & Arrow Functions",
+            duration: "35 mins",
+            xp: 110,
+            contentFile: "js-func-declarations.md",
+            quiz: createQuickQuiz("Functions", "Do arrow functions have their own 'this' binding?", ["Yes", "No"], 1, "Arrow functions lexically bind 'this'.")
+          },
+          {
+            id: "js-params-returns",
+            title: "Parameters and Return Values",
+            duration: "25 mins",
+            xp: 90,
+            contentFile: "js-params-returns.md",
+            quiz: createQuickQuiz("Returns", "What does a function return if there is no return statement?", ["0", "null", "undefined", "false"], 2, "A function returns undefined by default.")
+          },
+          {
+            id: "js-objects",
+            title: "Objects (Properties & Methods)",
+            duration: "30 mins",
+            xp: 100,
+            contentFile: "js-objects.md",
+            quiz: createQuickQuiz("Objects", "How do you access a property 'name' in an object 'user'?", ["user[name]", "user.name", "user->name", "Both user.name and user['name']"], 3, "You can use dot notation or bracket notation.")
+          },
+          {
+            id: "js-arrays-methods",
+            title: "Arrays & Core Methods (forEach, map, filter, reduce)",
             duration: "40 mins",
-            xp: 180,
-            contentFile: "js-promises.md",
-            quiz: createQuickQuiz(
-              "Async JS",
-              "What state does a Promise enter when it completes successfully?",
-              ["Pending", "Rejected", "Fulfilled", "Resolved"],
-              2,
-              "A Promise is in the 'fulfilled' state when the asynchronous operation completes successfully."
-            )
+            xp: 130,
+            contentFile: "js-arrays-methods.md",
+            quiz: createQuickQuiz("Arrays", "Which method returns a new array with elements that pass a test?", ["map", "forEach", "filter", "reduce"], 2, "filter creates a new array with all elements that pass the test implemented by the provided function.")
+          }
+        ]
+      },
+      {
+        id: "js-mod-3",
+        title: "Module 3: Working with the Browser (DOM & Events)",
+        lessons: [
+          {
+            id: "js-dom-selection-manipulation",
+            title: "DOM Selection & Manipulation",
+            duration: "40 mins",
+            xp: 120,
+            contentFile: "js-dom-selection-manipulation.md",
+            quiz: createQuickQuiz("DOM", "Which method is used to select an element by ID?", ["querySelector", "getElementById", "Both", "None"], 2, "Both getElementById and querySelector (with #id) can select elements by ID.")
+          },
+          {
+            id: "js-event-listeners",
+            title: "Event Listeners & Event Bubbling",
+            duration: "35 mins",
+            xp: 110,
+            contentFile: "js-event-listeners.md",
+            quiz: createQuickQuiz("Events", "What prevents event bubbling?", ["event.stopPropagation()", "event.preventDefault()", "event.stop()", "event.cancel()"], 0, "stopPropagation prevents further propagation of the current event.")
+          },
+          {
+            id: "js-ui-transitions",
+            title: "Triggering Smooth UI Transitions/Animations",
+            duration: "30 mins",
+            xp: 100,
+            contentFile: "js-ui-transitions.md",
+            quiz: createQuickQuiz("UI", "Which CSS property is commonly modified via JS for smooth transitions?", ["display", "classList", "float", "position"], 1, "Toggling classes via classList is the best way to trigger CSS transitions.")
+          }
+        ]
+      },
+      {
+        id: "js-mod-4",
+        title: "Module 4: Modern JavaScript (ES6+)",
+        lessons: [
+          {
+            id: "js-templates-destructuring",
+            title: "Template Literals & Destructuring",
+            duration: "35 mins",
+            xp: 110,
+            contentFile: "js-templates-destructuring.md",
+            quiz: createQuickQuiz("ES6", "What character is used for template literals?", ["'", "\"", "`", "~"], 2, "Backticks (`) are used for template literals.")
+          },
+          {
+            id: "js-spread-rest",
+            title: "Spread and Rest Operators",
+            duration: "30 mins",
+            xp: 100,
+            contentFile: "js-spread-rest.md",
+            quiz: createQuickQuiz("Operators", "Which operator collects multiple elements into an array?", ["Spread", "Rest", "Concat", "Gather"], 1, "Rest operator collects arguments into an array.")
+          },
+          {
+            id: "js-modules",
+            title: "ES6 Modules (Import/Export)",
+            duration: "30 mins",
+            xp: 100,
+            contentFile: "js-modules.md",
+            quiz: createQuickQuiz("Modules", "How do you import a default export named 'App'?", ["import { App } from './App'", "import App from './App'", "require('App')", "include App"], 1, "Default exports don't use curly braces when importing.")
+          }
+        ]
+      },
+      {
+        id: "js-mod-5",
+        title: "Module 5: Asynchronous Programming & APIs",
+        lessons: [
+          {
+            id: "js-promises-async",
+            title: "Promises & Async/Await Syntax",
+            duration: "40 mins",
+            xp: 130,
+            contentFile: "js-promises-async.md",
+            quiz: createQuickQuiz("Async", "What keyword handles a rejected promise in async/await?", ["catch", "except", "try/catch", "finally"], 2, "A try/catch block is used to handle exceptions in async/await.")
+          },
+          {
+            id: "js-fetch-json",
+            title: "Fetch API & Working with JSON Data",
+            duration: "40 mins",
+            xp: 120,
+            contentFile: "js-fetch-json.md",
+            quiz: createQuickQuiz("Fetch", "Fetch returns a:", ["Response object", "Promise", "JSON object", "String"], 1, "fetch() always returns a Promise.")
+          },
+          {
+            id: "js-error-handling",
+            title: "Error Handling (try/catch)",
+            duration: "25 mins",
+            xp: 90,
+            contentFile: "js-error-handling.md",
+            quiz: createQuickQuiz("Errors", "Which block always executes regardless of an error?", ["try", "catch", "finally", "except"], 2, "The finally block executes after try and catch.")
+          },
+          {
+            id: "js-external-apis",
+            title: "Connecting Frontends to External APIs",
+            duration: "45 mins",
+            xp: 140,
+            contentFile: "js-external-apis.md",
+            quiz: createQuickQuiz("APIs", "What is an API key usually passed in?", ["The URL or Headers", "The body", "Local storage", "Cookies"], 0, "API keys are usually passed as query parameters or Authorization headers.")
+          }
+        ]
+      },
+      {
+        id: "js-mod-6",
+        title: "Module 6: State & Data Management",
+        lessons: [
+          {
+            id: "js-localstorage",
+            title: "LocalStorage & SessionStorage",
+            duration: "35 mins",
+            xp: 110,
+            contentFile: "js-localstorage.md",
+            quiz: createQuickQuiz("Storage", "Which persists data after the browser is closed?", ["SessionStorage", "LocalStorage", "Both", "Neither"], 1, "LocalStorage persists until explicitly cleared.")
+          },
+          {
+            id: "js-state-strategies",
+            title: "Basic State Management Strategies",
+            duration: "45 mins",
+            xp: 140,
+            contentFile: "js-state-strategies.md",
+            quiz: createQuickQuiz("State", "What is 'state' in a frontend application?", ["A physical location", "Data that changes over time", "A CSS style", "A constant variable"], 1, "State represents dynamic data that changes during the lifecycle of the app.")
+          }
+        ]
+      },
+      {
+        id: "js-mod-7",
+        title: "Module 7: Developer Best Practices & Community",
+        lessons: [
+          {
+            id: "js-clean-debug",
+            title: "Clean Code & Debugging with Chrome DevTools",
+            duration: "40 mins",
+            xp: 120,
+            contentFile: "js-clean-debug.md",
+            quiz: createQuickQuiz("Debugging", "What command pauses code execution in DevTools?", ["halt", "stop", "debugger", "pause"], 2, "The 'debugger' statement invokes any available debugging functionality.")
+          },
+          {
+            id: "js-docs-reviews",
+            title: "Reading Documentation & Code Review Practices",
+            duration: "30 mins",
+            xp: 90,
+            contentFile: "js-docs-reviews.md",
+            quiz: createQuickQuiz("Reviews", "What is the main goal of a code review?", ["Find typos", "Ensure quality and share knowledge", "Blame developers", "Speed up deployment"], 1, "Code reviews improve code quality and facilitate team learning.")
+          },
+          {
+            id: "js-team-credit",
+            title: "Giving Team Members Credit",
+            duration: "20 mins",
+            xp: 50,
+            contentFile: "js-team-credit.md",
+            quiz: createQuickQuiz("Teamwork", "Why give credit for ideas?", ["To avoid lawsuits", "It builds trust and team morale", "To document everything", "It's required by git"], 1, "Giving credit fosters a supportive and collaborative environment.")
           }
         ]
       }
